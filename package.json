@@ -1,0 +1,16 @@
+{
+  "name": "school-website",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.4.1",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @school/web --filter @school/api dev",
+    "build": "pnpm --recursive build",
+    "check": "pnpm --recursive check",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "typescript": "^5.6.3"
+  }
+}
