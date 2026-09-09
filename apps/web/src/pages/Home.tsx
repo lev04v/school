@@ -1,113 +1,470 @@
-const notices = [
-  { date: "18 Jun", tag: "Admissions", title: "Applications for the 2026–27 academic year are now open." },
-  { date: "12 Jun", tag: "School life", title: "Summer enrichment clubs begin Monday, 22 June." },
-  { date: "04 Jun", tag: "Community", title: "Family orientation evening scheduled for new families." },
-];
+import { useState } from "react";
+import { PageId } from "../components/Header";
 
-const events = [
-  { month: "JUN", day: "22", title: "Summer Enrichment Clubs", detail: "All day · Horizon Campus" },
-  { month: "JUL", day: "05", title: "Family Orientation Evening", detail: "6:00 PM · Main Hall" },
-  { month: "JUL", day: "18", title: "Founders’ Day Celebration", detail: "9:30 AM · Sports Grounds" },
-];
-
-const pillars = [
-  { number: "01", title: "Curious minds", text: "Inquiry-led learning that gives every learner the confidence to ask better questions." },
-  { number: "02", title: "Strong character", text: "A caring community where integrity, empathy, and responsibility are lived every day." },
-  { number: "03", title: "Wider horizons", text: "Arts, sport, service, and technology help students discover their individual spark." },
-];
-
-function Arrow() {
-  return <span aria-hidden="true">↗</span>;
+interface HomePageProps {
+  onNavigate: (page: PageId, targetSectionId?: string) => void;
+  onOpenAdmissionModal: (stream?: string) => void;
 }
 
-export default function Home() {
+export default function Home({ onNavigate, onOpenAdmissionModal }: HomePageProps) {
+  const [heroImgLoaded, setHeroImgLoaded] = useState(false);
+
   return (
-    <div className="site-shell">
-      <div className="utility-bar">
-        <div className="container utility-inner">
-          <span>Admissions open for 2026–27</span>
-          <div className="utility-links">
-            <a href="tel:+1555014288">+1 (555) 014-288</a>
-            <a href="mailto:hello@horizonacademy.edu">hello@horizonacademy.edu</a>
-          </div>
-        </div>
-      </div>
-
-      <header className="site-header">
-        <div className="container nav-wrap">
-          <a className="brand" href="#top" aria-label="Horizon Academy home">
-            <span className="brand-mark">HA</span>
-            <span><strong>Horizon</strong><small>Academy</small></span>
-          </a>
-          <nav className="desktop-nav" aria-label="Main navigation">
-            <a href="#about">About</a>
-            <a href="#academics">Academics</a>
-            <a href="#admissions">Admissions</a>
-            <a href="#community">Community</a>
-            <a href="#contact">Contact</a>
-          </nav>
-          <a className="button button-small button-dark" href="#admissions">Apply now <Arrow /></a>
-        </div>
-      </header>
-
-      <main id="top">
-        <section className="hero container">
-          <div className="hero-copy">
-            <p className="eyebrow"><span className="eyebrow-line" /> Independent learning, shared purpose</p>
-            <h1>Where bright futures <em>take shape.</em></h1>
-            <p className="hero-lead">Horizon Academy is a warm, ambitious school where students are known, challenged, and inspired to make a meaningful difference.</p>
-            <div className="hero-actions">
-              <a className="button button-gold" href="#admissions">Admissions are open <Arrow /></a>
-              <a className="text-link" href="#about">Discover our approach <Arrow /></a>
+    <div className="homepage-wrap animate-fade-in">
+      <section className="kingster-hero-wrap" id="top">
+        <div className="hero-banner">
+          {/* Eager high-priority campus image with smooth progressive fade */}
+          <img
+            src="https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=1280&q=70"
+            alt="Horizon Academy Academic Campus"
+            className={`hero-banner-bg-img ${heroImgLoaded ? "is-loaded" : ""}`}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            onLoad={() => setHeroImgLoaded(true)}
+          />
+          <div className="hero-banner-overlay" />
+          <div className="container hero-content">
+            <div className="hero-badge-row">
+              <span className="hero-badge">
+                <span className="badge-dot" /> CBSE SENIOR SECONDARY SCHOOL · ESTD. 1998
+              </span>
+              <span className="hero-motto">“Vidya Dadati Vinayam” — Knowledge Bestows Humility</span>
             </div>
-            <div className="hero-note"><span className="avatar-stack"><i /><i /><i /></span><span>Join a community of <strong>1,200+ learners</strong></span></div>
+
+            <h1 className="hero-heading">
+              Where Ambition Meets <em className="text-shimmer">Academic Distinction.</em>
+            </h1>
+
+            <p className="hero-description">
+              Horizon Academy is a benchmark 10+2 CBSE institution in Delhi/NCR, combining
+              rigorous NCERT excellence with Atal Tinkering Lab (ATL) robotics, national Olympiads,
+              and specialized Senior Secondary streams in Science, Commerce, and Humanities.
+            </p>
+
+            <div className="hero-cta-group">
+              <button onClick={() => onOpenAdmissionModal()} className="btn-hero-primary">
+                <span>Admissions Open (2026-27)</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </button>
+              <button onClick={() => onNavigate("academics", "senior-secondary-wing")} className="btn-hero-secondary">
+                <span>Explore 10+2 Streams</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+              </button>
+              <button onClick={() => onNavigate("admissions", "admission-steps")} className="btn-hero-ghost">
+                <span>Admission Process & Info →</span>
+              </button>
+            </div>
+
+            <div className="hero-highlights-strip">
+              <div className="highlight-pill">
+                <strong>100%</strong>
+                <span>CBSE Board Pass Rate</span>
+              </div>
+              <div className="highlight-divider" />
+              <div className="highlight-pill">
+                <strong>98.4%</strong>
+                <span>Class 12 City Topper</span>
+              </div>
+              <div className="highlight-divider" />
+              <div className="highlight-pill">
+                <strong>40+ PGT/TGT</strong>
+                <span>Master Faculty</span>
+              </div>
+              <div className="highlight-divider" />
+              <div className="highlight-pill">
+                <strong>ATL Lab</strong>
+                <span>NITI Aayog Approved</span>
+              </div>
+            </div>
           </div>
-          <div className="hero-art" aria-label="Students collaborating in a bright classroom">
-            <div className="art-sun" /><div className="art-card"><span>Est. 1998</span><strong>Learn<br />with purpose.</strong></div>
-            <div className="art-caption"><span className="caption-dot" /> A place to belong</div>
+        </div>
+
+        <div className="container floating-cards-container">
+          <div className="floating-cards-grid">
+            <div className="floating-card">
+              <div className="card-top-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              </div>
+              <span className="card-stage">NURSERY — CLASS V</span>
+              <h3 className="card-title">Foundational Wing</h3>
+              <p className="card-text">
+                Play-based experiential learning following NEP 2020. Child-centric smart classrooms,
+                phonics, and foundational numeracy.
+              </p>
+              <button onClick={() => onNavigate("academics", "foundational-wing")} className="card-link-btn">
+                <span>Explore Wing Curriculum</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+
+            <div className="floating-card">
+              <div className="card-top-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              </div>
+              <span className="card-stage">CLASS VI — CLASS X</span>
+              <h3 className="card-title">Secondary School</h3>
+              <p className="card-text">
+                Rigorous NCERT syllabus, Olympiad training, ATL robotics projects,
+                and stellar Class 10 Board exam coaching.
+              </p>
+              <button onClick={() => onNavigate("academics", "secondary-wing")} className="card-link-btn">
+                <span>View Class IX-X Details</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+
+            <div className="floating-card card-accent">
+              <div className="card-top-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              </div>
+              <span className="card-stage">CLASS XI — XII (10+2)</span>
+              <h3 className="card-title">Senior Secondary Streams</h3>
+              <p className="card-text">
+                Specialized Science (PCM/PCB), Commerce, and Humanities with integrated
+                IIT-JEE, NEET, CUET, and CA Foundation mentoring.
+              </p>
+              <button onClick={() => onNavigate("academics", "senior-secondary-wing")} className="card-link-btn">
+                <span>Explore 3 Streams</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+
+            <div className="floating-card">
+              <div className="card-top-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              </div>
+              <span className="card-stage">10-ACRE ENVIRONMENT</span>
+              <h3 className="card-title">Campus & Co-Curriculars</h3>
+              <p className="card-text">
+                Atal Tinkering Lab, sports turf ground, 4-House leadership, composite
+                science labs, and 100% GPS-tracked bus fleet.
+              </p>
+              <button onClick={() => onNavigate("facilities", "facilities-overview")} className="card-link-btn">
+                <span>View Campus Facilities</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="ticker" aria-label="School highlights">
-          <div className="ticker-track container"><span>Academic excellence</span><b>✦</b><span>Creative confidence</span><b>✦</b><span>Belonging for everyone</span><b>✦</b><span>Academic excellence</span></div>
-        </section>
+      <section className="section-hook container">
+        <div className="hook-split-grid">
+          <div className="hook-text-col">
+            <span className="section-eyebrow">ESTABLISHED 1998 · LEGACY OF EXCELLENCE</span>
+            <h2 className="section-title">
+              Why Discerning Parents Choose <em>Horizon Academy</em>
+            </h2>
+            <p className="hook-lead">
+              For over 28 years, Horizon Academy has built an impeccable reputation for blending
+              rigorous academic achievement in CBSE Board Examinations with deep-seated Indian ethics.
+            </p>
+            <div className="hook-points-list">
+              <div className="hook-point-item">
+                <span className="point-icon">★</span>
+                <div>
+                  <strong>Proven CBSE Board Supremacy:</strong>
+                  <p>100% 1st division pass record with city-highest scores (98.4%) across all three 10+2 streams.</p>
+                </div>
+              </div>
+              <div className="hook-point-item">
+                <span className="point-icon">★</span>
+                <div>
+                  <strong>NITI Aayog Approved ATL STEM Center:</strong>
+                  <p>Hands-on 3D printing, IoT sensors, and robotics from Class VI upwards.</p>
+                </div>
+              </div>
+              <div className="hook-point-item">
+                <span className="point-icon">★</span>
+                <div>
+                  <strong>Complete Transparency & SARAS Compliance:</strong>
+                  <p>Full statutory disclosures, certified safety standards, and transparent fee policies.</p>
+                </div>
+              </div>
+            </div>
 
-        <section className="section container notice-layout" id="about">
-          <div className="section-intro">
-            <p className="eyebrow"><span className="eyebrow-line" /> Stay in the know</p>
-            <h2>Good things are<br /><em>happening here.</em></h2>
-            <p>From daily discoveries to important dates, this is where our school community finds its latest news.</p>
-            <a className="text-link" href="#news">View all news <Arrow /></a>
+            <div className="hook-btn-row">
+              <button onClick={() => onNavigate("about", "legacy-heritage")} className="btn-hero-primary">
+                Read Our 28-Year Story & Leadership →
+              </button>
+            </div>
           </div>
-          <div className="notice-board">
-            <div className="board-top"><div><span className="board-kicker">School updates</span><h3>Notice board</h3></div><span className="pin">✦</span></div>
-            <div className="notice-list">{notices.map((notice) => <article className="notice-item" key={notice.title}><time>{notice.date}</time><div><span className="tag">{notice.tag}</span><h4>{notice.title}</h4></div><span className="notice-arrow"><Arrow /></span></article>)}</div>
-            <a href="#contact" className="board-footer">See all announcements <Arrow /></a>
+
+          <div className="hook-visual-col">
+            <div className="hook-badge-card">
+              <div className="badge-shield-graphic">
+                <span>28+</span>
+                <small>YEARS OF TRUST</small>
+              </div>
+              <div className="badge-card-content">
+                <h4>14,000+ Alumni Worldwide</h4>
+                <p>Thriving across IITs, AIIMS, Delhi University, IIMs, civil services, and multinational leadership.</p>
+                <div className="badge-stats-row">
+                  <div><strong>100%</strong><span>Board Pass</span></div>
+                  <div><strong>1:20</strong><span>Faculty Ratio</span></div>
+                  <div><strong>10 Acres</strong><span>Campus</span></div>
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="director-section" id="community">
-          <div className="container director-grid">
-            <div className="director-portrait"><div className="portrait-glow" /><span className="portrait-initials">DR</span><span className="portrait-label">Director’s welcome</span></div>
-            <div className="director-copy"><p className="eyebrow"><span className="eyebrow-line" /> A word from our director</p><blockquote>“The best education does more than prepare a child for the future. It helps them see that they have a part to play in shaping it.”</blockquote><p>At Horizon, we believe every student deserves the space to discover their strengths, the support to navigate challenges, and the invitation to contribute to something bigger than themselves.</p><div className="director-signature"><strong>Dr. Amara Reyes</strong><span>Director, Horizon Academy</span></div><a className="text-link" href="#contact">Read the full message <Arrow /></a></div>
+      <section className="section-streams-hook">
+        <div className="container">
+          <div className="center-heading">
+            <span className="section-eyebrow">SPECIALIZED 10+2 PATHWAYS</span>
+            <h2 className="section-title">Senior Secondary Pathways (Class XI & XII)</h2>
+            <p className="section-subtitle">
+              Each stream is engineered with specialized subject groups and dedicated competitive coaching
+              to launch students into India's foremost colleges.
+            </p>
           </div>
-        </section>
 
-        <section className="section container" id="academics">
-          <div className="section-heading"><div><p className="eyebrow"><span className="eyebrow-line" /> The Horizon difference</p><h2>Education with a <em>wider view.</em></h2></div><p className="heading-aside">We pair high expectations with a deeply human approach, helping young people become capable, compassionate, and ready for what comes next.</p></div>
-          <div className="pillar-grid">{pillars.map((pillar) => <article className="pillar" key={pillar.number}><span className="pillar-number">{pillar.number}</span><h3>{pillar.title}</h3><p>{pillar.text}</p><a className="circle-arrow" href="#contact" aria-label={`Learn about ${pillar.title}`}><Arrow /></a></article>)}</div>
-        </section>
+          <div className="streams-preview-grid">
+            <div className="stream-preview-card">
+              <span className="stream-pill-tag">SCIENCE STREAM</span>
+              <h3>Medical & Non-Medical (PCM / PCB)</h3>
+              <p>Physics, Chemistry, Maths, Biology, Computer Science, and integrated JEE/NEET mentorship.</p>
+              <ul className="stream-feature-bullets">
+                <li>Individual senior practical workstations</li>
+                <li>Atal Tinkering Lab project integration</li>
+                <li>Daily problem-solving tutorials</li>
+              </ul>
+              <button onClick={() => onNavigate("academics", "senior-secondary-wing")} className="stream-card-cta">
+                View Science Syllabus & Labs →
+              </button>
+            </div>
 
-        <section className="admissions-section" id="admissions">
-          <div className="container admissions-grid"><div><p className="eyebrow eyebrow-light"><span className="eyebrow-line" /> Your next chapter starts here</p><h2>Ready to find<br /><em>your horizon?</em></h2><p>Come and experience our campus, meet our people, and see what makes Horizon feel like home.</p><a className="button button-gold" href="mailto:admissions@horizonacademy.edu">Start your application <Arrow /></a></div><div className="steps"><div className="step"><span>01</span><div><strong>Make an enquiry</strong><p>Tell us a little about your family.</p></div></div><div className="step"><span>02</span><div><strong>Visit our campus</strong><p>See learning in action and ask questions.</p></div></div><div className="step"><span>03</span><div><strong>Join the community</strong><p>Begin a remarkable journey with us.</p></div></div></div></div>
-        </section>
+            <div className="stream-preview-card">
+              <span className="stream-pill-tag">COMMERCE STREAM</span>
+              <h3>Business & Financial Leadership</h3>
+              <p>Accountancy, Business Studies, Economics, Applied Maths, IP, and CUET / CA Foundation cell.</p>
+              <ul className="stream-feature-bullets">
+                <li>Tally ERP & stock market simulation</li>
+                <li>Annual Youth Entrepreneurship Conclave</li>
+                <li>Top admissions in SRCC & Hindu College</li>
+              </ul>
+              <button onClick={() => onNavigate("academics", "senior-secondary-wing")} className="stream-card-cta">
+                View Commerce Syllabus →
+              </button>
+            </div>
 
-        <section className="section container events-section" id="news"><div className="section-heading"><div><p className="eyebrow"><span className="eyebrow-line" /> On the calendar</p><h2>Come and be <em>part of it.</em></h2></div><a className="text-link" href="#contact">View all events <Arrow /></a></div><div className="events-grid">{events.map((event) => <article className="event-card" key={event.title}><div className="event-date"><span>{event.month}</span><strong>{event.day}</strong></div><div><h3>{event.title}</h3><p>{event.detail}</p></div><a href="#contact" className="circle-arrow" aria-label={`Learn about ${event.title}`}><Arrow /></a></article>)}</div></section>
+            <div className="stream-preview-card">
+              <span className="stream-pill-tag">HUMANITIES STREAM</span>
+              <h3>Policy, Law & Social Sciences</h3>
+              <p>History, Political Science, Psychology, Sociology, Legal Studies, and CLAT / UPSC foundation.</p>
+              <ul className="stream-feature-bullets">
+                <li>Horizon Model United Nations (MUN)</li>
+                <li>Psychology laboratory & psychometrics</li>
+                <li>National Youth Parliament laureates</li>
+              </ul>
+              <button onClick={() => onNavigate("academics", "senior-secondary-wing")} className="stream-card-cta">
+                View Humanities Syllabus →
+              </button>
+            </div>
+          </div>
 
-        <section className="visit-section" id="contact"><div className="container visit-grid"><div><p className="eyebrow"><span className="eyebrow-line" /> Come say hello</p><h2>There’s always<br /><em>a place for you.</em></h2></div><div className="visit-details"><p>We would love to welcome you to Horizon Academy. Book a campus tour or speak with our admissions team.</p><div className="contact-lines"><a href="mailto:hello@horizonacademy.edu">hello@horizonacademy.edu</a><a href="tel:+1555014288">+1 (555) 014-288</a><span>18 Horizon Lane, Portland, OR</span></div><a className="text-link" href="mailto:admissions@horizonacademy.edu">Plan your visit <Arrow /></a></div></div></section>
-      </main>
+          <div className="streams-hook-footer">
+            <button onClick={() => onNavigate("academics", "senior-secondary-wing")} className="btn-hero-primary">
+              Compare All 3 Streams & Subject Groups →
+            </button>
+          </div>
+        </div>
+      </section>
 
-      <footer className="footer"><div className="container footer-grid"><div><a className="brand brand-light" href="#top"><span className="brand-mark">HA</span><span><strong>Horizon</strong><small>Academy</small></span></a><p>Learn with purpose.<br />Lead with heart.</p></div><div><span className="footer-label">Explore</span><a href="#about">Our school</a><a href="#academics">Academics</a><a href="#community">Student life</a></div><div><span className="footer-label">Connect</span><a href="#admissions">Admissions</a><a href="#contact">Contact us</a><a href="#news">News & events</a></div><div><span className="footer-label">Stay connected</span><p className="footer-muted">Sign up for occasional news from our community.</p><a className="button button-gold button-small" href="mailto:hello@horizonacademy.edu">Subscribe <Arrow /></a></div></div><div className="container footer-bottom"><span>© 2026 Horizon Academy</span><span>Privacy · Safeguarding · Accessibility</span></div></footer>
+      <section className="section-leader-hook container">
+        <div className="leader-hook-box">
+          <div className="leader-hook-quote-side">
+            <span className="section-eyebrow eyebrow-light">FROM THE PRINCIPAL'S DESK</span>
+            <blockquote className="leader-hook-quote">
+              “True education is not merely the accumulation of facts, but the training of the mind
+              to think analytically, empathize deeply, and act with moral integrity.”
+            </blockquote>
+            <div className="leader-hook-author">
+              <strong>Dr. Rajeshwari Swaminathan</strong>
+              <span>M.Sc. (Physics), M.Ed., Ph.D. | Principal & Director of Academics</span>
+              <small>National CBSE Educator Awardee</small>
+            </div>
+            <button onClick={() => onNavigate("about", "principal-message")} className="btn-cta-gold">
+              Read Principal's Full Address & Philosophy →
+            </button>
+          </div>
+
+          <div className="leader-hook-seal-side">
+            <div className="official-seal-badge">
+              <span className="seal-star-big">★</span>
+              <strong>HORIZON ACADEMY</strong>
+              <span>OFFICIAL CBSE SEAL</span>
+              <small>AFFIL NO. 2130845</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-adm-hook container">
+        <div className="adm-hook-banner">
+          <div className="adm-hook-text">
+            <span className="adm-live-badge">🔴 ADMISSIONS OPEN · SESSION 2026–27</span>
+            <h2 className="adm-hook-title">Begin Your Child's Journey of Excellence</h2>
+            <p className="adm-hook-sub">
+              Seats filling fast for Pre-Primary (Nursery, LKG, UKG), Class I, Class IX,
+              and Class XI (Science, Commerce & Humanities). Review fee structures and schedule your campus tour.
+            </p>
+            <div className="adm-hook-buttons">
+              <button onClick={() => onOpenAdmissionModal()} className="btn-hero-primary">
+                Apply Online Now (2026-27)
+              </button>
+              <button onClick={() => onNavigate("admissions", "admission-steps")} className="btn-call-desk">
+                Admission Process & Eligibility →
+              </button>
+            </div>
+          </div>
+
+          <div className="adm-hook-facts">
+            <div className="fact-box">
+              <span className="fact-label">Registration Deadline</span>
+              <strong className="fact-val">Session 2026–27</strong>
+            </div>
+            <div className="fact-box">
+              <span className="fact-label">Affiliation Status</span>
+              <strong className="fact-val">10+2 CBSE All Streams</strong>
+            </div>
+            <div className="fact-box">
+              <span className="fact-label">Age Eligibility</span>
+              <strong className="fact-val">As per NEP 2020</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-campus-hook">
+        <div className="container">
+          <div className="section-heading-row">
+            <div>
+              <span className="section-eyebrow">WORLD-CLASS INFRASTRUCTURE</span>
+              <h2 className="section-title">Life on Our 10-Acre Campus</h2>
+            </div>
+            <button onClick={() => onNavigate("facilities", "facilities-overview")} className="text-link-decorated">
+              Explore All Facilities & Clubs →
+            </button>
+          </div>
+
+          <div className="campus-preview-grid">
+            <div className="campus-card-teaser">
+              <span className="teaser-icon">⚡</span>
+              <h3>Atal Tinkering Lab (ATL)</h3>
+              <p>NITI Aayog recognized innovation hub with 3D printers, IoT sensors, and robotics.</p>
+            </div>
+
+            <div className="campus-card-teaser">
+              <span className="teaser-icon">🔬</span>
+              <h3>Composite Science Labs</h3>
+              <p>Senior physics, chemistry & biotechnology labs equipped for CBSE board practicals.</p>
+            </div>
+
+            <div className="campus-card-teaser">
+              <span className="teaser-icon">⚽</span>
+              <h3>Sports & Turf Arena</h3>
+              <p>Cricket turf ground, basketball courts, 200m track, and certified NIS coaches.</p>
+            </div>
+
+            <div className="campus-card-teaser">
+              <span className="teaser-icon">🏛️</span>
+              <h3>The Four House System</h3>
+              <p>Raman, Tagore, Ashoka, and Shivaji houses developing camaraderie and leadership.</p>
+            </div>
+          </div>
+
+          <div className="center-btn-row">
+            <button onClick={() => onNavigate("facilities", "house-system")} className="btn-call-desk">
+              Discover Campus Life & House Standings →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-bulletin-hook container">
+        <div className="bulletin-split-grid">
+          <div className="bulletin-left">
+            <div className="block-header">
+              <div>
+                <span className="section-eyebrow">OFFICIAL NOTICES</span>
+                <h3 className="block-title">Latest Circulars</h3>
+              </div>
+              <button onClick={() => onNavigate("circulars", "circulars-archive")} className="link-academic-calendar">
+                All Notices Archive →
+              </button>
+            </div>
+
+            <div className="bulletin-quick-list">
+              <div className="bulletin-quick-item">
+                <span className="item-date">04 Oct 2026</span>
+                <div>
+                  <strong>Online Registration Open for Session 2026-27 (10+2 Streams)</strong>
+                  <span className="item-ref">Ref: HA/ADM/26-27/01</span>
+                </div>
+              </div>
+              <div className="bulletin-quick-item">
+                <span className="item-date">28 Sep 2026</span>
+                <div>
+                  <strong>CBSE AISSE & AISSCE Class 10/12 Board Practical Exam Schedule</strong>
+                  <span className="item-ref">Ref: CBSE/COORD/2026</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bulletin-right">
+            <div className="block-header">
+              <div>
+                <span className="section-eyebrow">CAMPUS DIARY</span>
+                <h3 className="block-title">Upcoming Event</h3>
+              </div>
+              <button onClick={() => onNavigate("circulars", "academic-calendar")} className="link-academic-calendar">
+                Full 2026-27 Calendar →
+              </button>
+            </div>
+
+            <div className="event-feature-box">
+              <div className="event-date-badge">
+                <span className="badge-month">OCT</span>
+                <strong className="badge-day">18</strong>
+                <span className="badge-year">2026</span>
+              </div>
+              <div className="event-feature-info">
+                <h4>Inter-School ATL Robotics & STEM Conclave</h4>
+                <p>09:30 AM – 03:00 PM · Horizon Raman Auditorium & ATL Labs</p>
+                <button onClick={() => onNavigate("circulars", "circulars-archive")} className="event-join-link">
+                  View Event Schedule & Invitation →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-visit-hook container">
+        <div className="visit-hook-card">
+          <div>
+            <span className="section-eyebrow eyebrow-light">COME SAY HELLO</span>
+            <h2 className="visit-hook-heading">Experience Our Campus in Person</h2>
+            <p className="visit-hook-desc">
+              Book a campus tour with our admission counselors, meet faculty, and inspect our classrooms.
+              Located at Sector 14, Institutional Area, New Delhi / NCR.
+            </p>
+          </div>
+          <div className="visit-hook-actions">
+            <button onClick={() => onNavigate("contact", "tour-booking")} className="btn-cta-gold">
+              Schedule a Campus Tour →
+            </button>
+            <a href="tel:+911128904455" className="btn-hero-ghost">
+              Call Admissions: +91 11 2890 4455
+            </a>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
