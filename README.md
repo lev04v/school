@@ -25,3 +25,5 @@ The homepage currently uses local typed arrays in `apps/web/src/pages/Home.tsx` 
 ## Backend module convention
 
 Each future backend domain should use a predictable module boundary containing a router or controller, service, repository, input schema, policy, types, and tests. Authentication and authorization must be enforced server-side, and sensitive changes such as grade publication, fee updates, role changes, and document access should be auditable.
+
+this is the school website
