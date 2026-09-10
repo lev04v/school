@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { PageId } from "../components/Header";
 import { PageHero } from "../components/PageHero";
 
@@ -19,7 +19,7 @@ interface GalleryItem {
 
 export default function Gallery({ onNavigate, onOpenAdmissionModal }: GalleryProps) {
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const galleryItems: GalleryItem[] = [
     {
@@ -78,7 +78,7 @@ export default function Gallery({ onNavigate, onOpenAdmissionModal }: GalleryPro
     },
     {
       id: 7,
-      title: "Horizon Model United Nations (MUN)",
+      title: "Horizon Model United Nations (HMUN)",
       category: "cultural",
       categoryLabel: "Cultural & Stage",
       date: "September 2026",
@@ -136,62 +136,139 @@ export default function Gallery({ onNavigate, onOpenAdmissionModal }: GalleryPro
     (item) => activeCategory === "all" || item.category === activeCategory
   );
 
+  const selectedItem = selectedIndex !== null ? filteredItems[selectedIndex] : null;
+
+  const handleNext = useCallback(() => {
+    if (selectedIndex !== null) {
+      setSelectedIndex((selectedIndex + 1) % filteredItems.length);
+    }
+  }, [selectedIndex, filteredItems.length]);
+
+  const handlePrev = useCallback(() => {
+    if (selectedIndex !== null) {
+      setSelectedIndex((selectedIndex - 1 + filteredItems.length) % filteredItems.length);
+    }
+  }, [selectedIndex, filteredItems.length]);
+
+  // Keyboard navigation for Lightbox: Escape to close, Arrows to navigate
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedIndex === null) return;
+      if (e.key === "Escape") {
+        setSelectedIndex(null);
+      } else if (e.key === "ArrowRight") {
+        handleNext();
+      } else if (e.key === "ArrowLeft") {
+        handlePrev();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedIndex, handleNext, handlePrev]);
+
+  // Auto-scroll to gallery grid on load/mount so user lands directly on photos instead of hero banner
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const el = document.getElementById("gallery-grid");
+      if (el) {
+        const navHeight = 90;
+        const pos = el.getBoundingClientRect().top + window.pageYOffset - navHeight;
+        window.scrollTo({ top: Math.max(0, pos), behavior: "smooth" });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="page-wrapper animate-fade-in">
       {/* Header Banner */}
       <PageHero
-        breadcrumbCurrent="Campus Gallery"
+        breadcrumbCurrent="Gallery"
         onNavigate={onNavigate}
-        kicker="CAMPUS GLIMPSES · PROGRAMS · EXCELLENCE IN ACTION"
-        title={<>Campus Life, Activities & <span className="text-shimmer">Visual Showcase</span></>}
-        subtitle="Explore our state-of-the-art academic architecture, cutting-edge science and robotics laboratories, vibrant athletic arenas, and memorable annual celebrations."
-        imageUrl="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1280&q=70"
-        imageAlt="Horizon Academy Campus Atrium and Visual Gallery"
+        kicker="Campus Glimpses · Excellence in Action"
+        title={<>Moments of discovery, <em>joy &amp; achievement.</em></>}
+        subtitle="Explore our vibrant campus life through candid glimpses of smart classrooms, laboratory research, sports tournaments, and creative celebrations."
+        imageUrl="https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=1200&q=85"
+        imageAlt="Horizon Academy Campus Life and Celebrations"
+        primaryCtaLabel="Explore Albums"
+        onPrimaryCtaClick={() => document.getElementById("gallery-filter-bar")?.scrollIntoView({ behavior: "smooth" })}
       />
 
-      {/* Gallery Filter & Grid Section */}
-      <section className="section-gallery-main container">
-        {/* Category Filters */}
-        <div className="gallery-filter-bar">
+      {/* Gallery Filter Bar & Grid Section */}
+      <section className="section-gallery-main container" id="gallery-grid">
+        <div className="gallery-filter-bar" id="gallery-filter-bar" role="tablist" aria-label="Gallery categories">
           <button
             className={`gallery-filter-pill ${activeCategory === "all" ? "active" : ""}`}
-            onClick={() => setActiveCategory("all")}
+            onClick={() => {
+              setActiveCategory("all");
+              setSelectedIndex(null);
+            }}
+            role="tab"
+            aria-selected={activeCategory === "all"}
           >
-            All Photos ({galleryItems.length})
+            All Photographs ({galleryItems.length})
           </button>
           <button
             className={`gallery-filter-pill ${activeCategory === "campus" ? "active" : ""}`}
-            onClick={() => setActiveCategory("campus")}
+            onClick={() => {
+              setActiveCategory("campus");
+              setSelectedIndex(null);
+            }}
+            role="tab"
+            aria-selected={activeCategory === "campus"}
           >
-            Campus & Architecture
+            Campus Architecture
           </button>
           <button
             className={`gallery-filter-pill ${activeCategory === "labs" ? "active" : ""}`}
-            onClick={() => setActiveCategory("labs")}
+            onClick={() => {
+              setActiveCategory("labs");
+              setSelectedIndex(null);
+            }}
+            role="tab"
+            aria-selected={activeCategory === "labs"}
           >
             STEM & Laboratories
           </button>
           <button
             className={`gallery-filter-pill ${activeCategory === "sports" ? "active" : ""}`}
-            onClick={() => setActiveCategory("sports")}
+            onClick={() => {
+              setActiveCategory("sports");
+              setSelectedIndex(null);
+            }}
+            role="tab"
+            aria-selected={activeCategory === "sports"}
           >
             Sports & Athletics
           </button>
           <button
             className={`gallery-filter-pill ${activeCategory === "cultural" ? "active" : ""}`}
-            onClick={() => setActiveCategory("cultural")}
+            onClick={() => {
+              setActiveCategory("cultural");
+              setSelectedIndex(null);
+            }}
+            role="tab"
+            aria-selected={activeCategory === "cultural"}
           >
             Cultural & Stage Events
           </button>
         </div>
 
-        {/* Image Grid */}
+        {/* Masonry/Editorial Grid */}
         <div className="gallery-items-grid">
-          {filteredItems.map((item) => (
-            <div
-              className="gallery-card"
+          {filteredItems.map((item, idx) => (
+            <article
+              className={`gallery-card ${idx % 2 === 0 ? "reveal-left" : "reveal-right"}`}
               key={item.id}
-              onClick={() => setSelectedItem(item)}
+              onClick={() => setSelectedIndex(idx)}
+              role="button"
+              tabIndex={0}
+              aria-label={`View ${item.title}`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setSelectedIndex(idx);
+                }
+              }}
             >
               <div className="gallery-image-wrapper">
                 <img
@@ -204,7 +281,7 @@ export default function Gallery({ onNavigate, onOpenAdmissionModal }: GalleryPro
                   <span className="gallery-zoom-icon">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
                   </span>
-                  <span className="gallery-view-text">Click to View Photo</span>
+                  <span className="gallery-view-text">Click to View High-Res</span>
                 </div>
                 <span className="gallery-category-badge">{item.categoryLabel}</span>
               </div>
@@ -214,22 +291,45 @@ export default function Gallery({ onNavigate, onOpenAdmissionModal }: GalleryPro
                 <h3 className="gallery-item-title">{item.title}</h3>
                 <p className="gallery-item-desc">{item.desc}</p>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       </section>
 
-      {/* Lightbox Modal */}
+      {/* Accessible Fullscreen Lightbox Modal */}
       {selectedItem && (
-        <div className="modal-backdrop" onClick={() => setSelectedItem(null)}>
+        <div
+          className="modal-backdrop"
+          onClick={() => setSelectedIndex(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={selectedItem.title}
+        >
           <div className="lightbox-modal-card" onClick={(e) => e.stopPropagation()}>
             <button
               className="modal-close-btn"
-              onClick={() => setSelectedItem(null)}
-              aria-label="Close Lightbox"
+              onClick={() => setSelectedIndex(null)}
+              aria-label="Close Lightbox (Esc)"
             >
               ✕
             </button>
+
+            {/* Navigation Arrows */}
+            <button
+              className="lightbox-arrow-btn prev"
+              onClick={handlePrev}
+              aria-label="Previous image (Left Arrow)"
+            >
+              ‹
+            </button>
+            <button
+              className="lightbox-arrow-btn next"
+              onClick={handleNext}
+              aria-label="Next image (Right Arrow)"
+            >
+              ›
+            </button>
+
             <div className="lightbox-image-wrap">
               <img
                 src={selectedItem.imageUrl}
@@ -237,19 +337,25 @@ export default function Gallery({ onNavigate, onOpenAdmissionModal }: GalleryPro
                 className="lightbox-full-img"
               />
             </div>
+
             <div className="lightbox-meta">
-              <span className="lightbox-cat">{selectedItem.categoryLabel} · {selectedItem.date}</span>
+              <div className="lightbox-meta-top">
+                <span className="lightbox-cat">{selectedItem.categoryLabel} · {selectedItem.date}</span>
+                <span className="lightbox-count">
+                  {selectedIndex! + 1} / {filteredItems.length}
+                </span>
+              </div>
               <h2 className="lightbox-title">{selectedItem.title}</h2>
               <p className="lightbox-desc">{selectedItem.desc}</p>
               <div className="lightbox-actions">
                 <button
                   onClick={() => {
-                    setSelectedItem(null);
+                    setSelectedIndex(null);
                     onOpenAdmissionModal();
                   }}
                   className="btn-hero-primary"
                 >
-                  Schedule Campus Tour & Apply →
+                  Schedule Campus Walkthrough & Apply →
                 </button>
               </div>
             </div>
@@ -262,7 +368,7 @@ export default function Gallery({ onNavigate, onOpenAdmissionModal }: GalleryPro
         <div className="page-cta-box">
           <div>
             <h3>Experience These Spaces Firsthand</h3>
-            <p>We invite parents and prospective students to tour our laboratories, grounds, and classrooms.</p>
+            <p>We invite parents and prospective students to tour our laboratories, athletic arenas, and classrooms.</p>
           </div>
           <div className="page-cta-actions">
             <button onClick={() => onNavigate("contact")} className="btn-hero-primary">

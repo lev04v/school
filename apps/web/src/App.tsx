@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import Header, { PageId } from "./components/Header";
 import Footer from "./components/Footer";
 import AdmissionModal from "./components/AdmissionModal";
+import Preloader from "./components/Preloader";
+import PageLoader from "./components/PageLoader";
+import PageTransition from "./components/PageTransition";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Academics from "./pages/Academics";
@@ -11,36 +14,63 @@ import Gallery from "./pages/Gallery";
 import CircularsEvents from "./pages/CircularsEvents";
 import Contact from "./pages/Contact";
 
+const PAGE_NAMES: Record<PageId, string> = {
+  home: "Home Campus",
+  about: "Heritage & About Us",
+  academics: "Academic Programs",
+  admissions: "Admissions 2026–27",
+  facilities: "Campus",
+  gallery: "Gallery",
+  circulars: "News & Events",
+  contact: "Contact & Helpline",
+};
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageId>("home");
+  const [isRouteLoading, setIsRouteLoading] = useState(false);
+  const [routeTargetName, setRouteTargetName] = useState("");
   const [isAdmissionModalOpen, setIsAdmissionModalOpen] = useState(false);
   const [selectedStream, setSelectedStream] = useState<string | undefined>(undefined);
 
   const scrollToTargetSection = (sectionId: string) => {
     let attempts = 0;
-    const maxAttempts = 15;
+    const maxAttempts = 25;
     const tryScroll = () => {
       const el = document.getElementById(sectionId);
       if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        const navHeight = 90;
+        const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+        window.scrollTo({
+          top: Math.max(0, elementPosition - navHeight),
+          behavior: "smooth",
+        });
         el.classList.add("target-highlight-pulse");
         setTimeout(() => {
           el.classList.remove("target-highlight-pulse");
         }, 2600);
       } else if (attempts < maxAttempts) {
         attempts++;
-        setTimeout(tryScroll, 60);
+        setTimeout(tryScroll, 50);
       }
     };
-    setTimeout(tryScroll, 40);
+    setTimeout(tryScroll, 60);
   };
 
   useEffect(() => {
     const handleHashChange = () => {
       const rawHash = window.location.hash.replace("#", "");
       if (!rawHash) {
-        setCurrentPage("home");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        if (currentPage !== "home") {
+          setRouteTargetName("Home Campus");
+          setIsRouteLoading(true);
+          window.scrollTo({ top: 0, behavior: "instant" });
+          setTimeout(() => {
+            setCurrentPage("home");
+            setTimeout(() => setIsRouteLoading(false), 200);
+          }, 450);
+        } else {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
         return;
       }
 
@@ -51,15 +81,36 @@ export default function App() {
 
       const validPages: PageId[] = ["home", "about", "academics", "admissions", "facilities", "gallery", "circulars", "contact"];
       if (validPages.includes(pageCandidate)) {
-        setCurrentPage(pageCandidate);
-        if (targetSectionId) {
-          scrollToTargetSection(targetSectionId);
+        if (pageCandidate !== currentPage) {
+          setRouteTargetName(PAGE_NAMES[pageCandidate] || pageCandidate);
+          setIsRouteLoading(true);
+          window.scrollTo({ top: 0, behavior: "instant" });
+          setTimeout(() => {
+            setCurrentPage(pageCandidate);
+            const effectiveSection =
+              pageCandidate === "circulars" && !targetSectionId
+                ? "circulars"
+                : pageCandidate === "gallery" && !targetSectionId
+                ? "gallery-grid"
+                : targetSectionId;
+            if (effectiveSection) {
+              scrollToTargetSection(effectiveSection);
+            } else {
+              window.scrollTo({ top: 0, behavior: "instant" });
+            }
+            setTimeout(() => setIsRouteLoading(false), 200);
+          }, 450);
         } else {
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          const effectiveSection =
+            pageCandidate === "circulars" && !targetSectionId
+              ? "circulars"
+              : pageCandidate === "gallery" && !targetSectionId
+              ? "gallery-grid"
+              : targetSectionId;
+          if (effectiveSection) {
+            scrollToTargetSection(effectiveSection);
+          }
         }
-      } else {
-        setCurrentPage("home");
-        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     };
 
@@ -69,7 +120,7 @@ export default function App() {
 
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
-  }, []);
+  }, [currentPage]);
 
   // Preload subpage hero images during browser idle time for zero-latency page transitions
   useEffect(() => {
@@ -81,7 +132,7 @@ export default function App() {
       "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1280&q=70",
       "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1280&q=70",
       "https://images.unsplash.com/photo-1592280771190-3e2e4d571952?auto=format&fit=crop&w=1280&q=70",
-      "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1280&q=70", // Footer campus backdrop
+      "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1280&q=70",
     ];
 
     const preloadImages = () => {
@@ -104,15 +155,184 @@ export default function App() {
     }
   }, []);
 
-  const navigateTo = (page: PageId, targetSectionId?: string) => {
-    const targetHash = targetSectionId ? `${page}/${targetSectionId}` : page;
-    window.location.hash = targetHash;
-    setCurrentPage(page);
+  // Global Scroll Reveal Observer (Slides elements into display from sides on scroll across all pages)
+  useEffect(() => {
+    let observer: IntersectionObserver | null = null;
 
-    if (targetSectionId) {
-      scrollToTargetSection(targetSectionId);
+    // Automatically tag layout elements on any page with side slide-in animations
+    const tagAutoReveals = () => {
+      // Elements that should slide in from LEFT: text columns, cards at odd positions, headings
+      const leftSelectors = [
+        ".col-left",
+        ".stage-text-col",
+        ".contact-form-box",
+        ".transport-copy",
+        ".tps-portrait",
+        ".founder-decree-card",
+        ".campus-featured-card",
+        ".life-spotlight-visual",
+        ".adm-conversion-copy",
+        ".about-mission-card",
+        ".cal-banner-copy",
+        ".desk-card:nth-child(odd)",
+        ".why-learn-card:nth-child(odd)",
+        ".gallery-card:nth-child(odd)",
+        ".club-card:nth-child(odd)",
+        ".story-stats__item:nth-child(odd)",
+        ".faculty-card:nth-child(odd)",
+        ".adm-step-card:nth-child(odd)",
+        ".facility-card:nth-child(odd)",
+        ".dept-card-enhanced:nth-child(odd)",
+        ".spotlight-card:nth-child(odd)",
+        ".cal-event-card-modern:nth-child(odd)",
+      ];
+
+      // Elements that should slide in from RIGHT: image columns, cards at even positions, action boxes
+      const rightSelectors = [
+        ".col-right",
+        ".stage-image-col",
+        ".contact-info-column",
+        ".transport-action-box",
+        ".tps-content",
+        ".campus-sub-card",
+        ".life-spotlight-info",
+        ".adm-conversion-facts",
+        ".about-vision-card",
+        ".cal-banner-actions",
+        ".desk-card:nth-child(even)",
+        ".why-learn-card:nth-child(even)",
+        ".gallery-card:nth-child(even)",
+        ".club-card:nth-child(even)",
+        ".story-stats__item:nth-child(even)",
+        ".faculty-card:nth-child(even)",
+        ".adm-step-card:nth-child(even)",
+        ".facility-card:nth-child(even)",
+        ".dept-card-enhanced:nth-child(even)",
+        ".spotlight-card:nth-child(even)",
+        ".cal-event-card-modern:nth-child(even)",
+      ];
+
+      leftSelectors.forEach((sel) => {
+        document.querySelectorAll(sel).forEach((el, i) => {
+          if (!el.classList.contains("reveal-left") && !el.classList.contains("reveal-right") && !el.classList.contains("reveal-up")) {
+            el.classList.add("reveal-left");
+            if (i % 2 === 1) el.classList.add("delay-100");
+          }
+        });
+      });
+
+      rightSelectors.forEach((sel) => {
+        document.querySelectorAll(sel).forEach((el, i) => {
+          if (!el.classList.contains("reveal-left") && !el.classList.contains("reveal-right") && !el.classList.contains("reveal-up")) {
+            el.classList.add("reveal-right");
+            if (i % 2 === 1) el.classList.add("delay-200");
+          }
+        });
+      });
+
+      // Section center headings slide up gently
+      document.querySelectorAll(".center-heading, .section-heading-row, .why-learn-head").forEach((el) => {
+        if (!el.classList.contains("reveal-left") && !el.classList.contains("reveal-right") && !el.classList.contains("reveal-up")) {
+          el.classList.add("reveal-up");
+        }
+      });
+    };
+
+    const setupObserver = () => {
+      if (observer) {
+        observer.disconnect();
+      }
+
+      tagAutoReveals();
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("active");
+              observer?.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          threshold: 0.06,
+          rootMargin: "0px 0px -30px 0px",
+        }
+      );
+
+      const targets = document.querySelectorAll(".reveal, .reveal-left, .reveal-right, .reveal-up");
+      targets.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 30 && rect.bottom > 0) {
+          el.classList.add("active");
+        } else {
+          observer?.observe(el);
+        }
+      });
+    };
+
+    const handleScroll = () => {
+      const targets = document.querySelectorAll(".reveal:not(.active), .reveal-left:not(.active), .reveal-right:not(.active), .reveal-up:not(.active)");
+      targets.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 30 && rect.bottom > 0) {
+          el.classList.add("active");
+        }
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    const timer = setTimeout(setupObserver, 50);
+    const retryTimer = setTimeout(setupObserver, 250);
+    const lateTimer = setTimeout(setupObserver, 750);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(timer);
+      clearTimeout(retryTimer);
+      clearTimeout(lateTimer);
+      if (observer) observer.disconnect();
+    };
+  }, [currentPage]);
+
+  const navigateTo = (page: PageId, targetSectionId?: string) => {
+    const effectiveSection =
+      page === "circulars" && !targetSectionId
+        ? "circulars"
+        : page === "gallery" && !targetSectionId
+        ? "gallery-grid"
+        : targetSectionId;
+
+    if (page !== currentPage) {
+      setRouteTargetName(PAGE_NAMES[page] || page);
+      setIsRouteLoading(true);
+
+      // Instant scroll to top behind loading curtain
+      window.scrollTo({ top: 0, behavior: "instant" });
+
+      // Fast and responsive page transition
+      setTimeout(() => {
+        const targetHash = effectiveSection ? `${page}/${effectiveSection}` : page;
+        window.location.hash = targetHash;
+        setCurrentPage(page);
+
+        if (effectiveSection) {
+          scrollToTargetSection(effectiveSection);
+        } else {
+          window.scrollTo({ top: 0, behavior: "instant" });
+        }
+
+        setIsRouteLoading(false);
+      }, 160);
     } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      const targetHash = effectiveSection ? `${page}/${effectiveSection}` : page;
+      window.location.hash = targetHash;
+      if (effectiveSection) {
+        scrollToTargetSection(effectiveSection);
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
   };
 
@@ -128,6 +348,9 @@ export default function App() {
 
   return (
     <div className="site-shell">
+      <Preloader />
+      <PageLoader isLoading={isRouteLoading} targetPageName={routeTargetName} />
+
       <Header
         currentPage={currentPage}
         onNavigate={navigateTo}
@@ -135,51 +358,53 @@ export default function App() {
       />
 
       <main id="main-content">
-        {currentPage === "home" && (
-          <Home
-            onNavigate={navigateTo}
-            onOpenAdmissionModal={handleOpenAdmissionModal}
-          />
-        )}
-        {currentPage === "about" && (
-          <About
-            onNavigate={navigateTo}
-            onOpenAdmissionModal={() => handleOpenAdmissionModal()}
-          />
-        )}
-        {currentPage === "academics" && (
-          <Academics
-            onNavigate={navigateTo}
-            onOpenAdmissionModal={handleOpenAdmissionModal}
-          />
-        )}
-        {currentPage === "admissions" && (
-          <Admissions
-            onNavigate={navigateTo}
-            onOpenAdmissionModal={handleOpenAdmissionModal}
-          />
-        )}
-        {currentPage === "facilities" && (
-          <CampusLifePage
-            onNavigate={navigateTo}
-            onOpenAdmissionModal={() => handleOpenAdmissionModal()}
-          />
-        )}
-        {currentPage === "gallery" && (
-          <Gallery
-            onNavigate={navigateTo}
-            onOpenAdmissionModal={() => handleOpenAdmissionModal()}
-          />
-        )}
-        {currentPage === "circulars" && (
-          <CircularsEvents
-            onNavigate={navigateTo}
-            onOpenAdmissionModal={() => handleOpenAdmissionModal()}
-          />
-        )}
-        {currentPage === "contact" && (
-          <Contact onNavigate={navigateTo} />
-        )}
+        <PageTransition pageKey={currentPage}>
+          {currentPage === "home" && (
+            <Home
+              onNavigate={navigateTo}
+              onOpenAdmissionModal={handleOpenAdmissionModal}
+            />
+          )}
+          {currentPage === "about" && (
+            <About
+              onNavigate={navigateTo}
+              onOpenAdmissionModal={() => handleOpenAdmissionModal()}
+            />
+          )}
+          {currentPage === "academics" && (
+            <Academics
+              onNavigate={navigateTo}
+              onOpenAdmissionModal={handleOpenAdmissionModal}
+            />
+          )}
+          {currentPage === "admissions" && (
+            <Admissions
+              onNavigate={navigateTo}
+              onOpenAdmissionModal={handleOpenAdmissionModal}
+            />
+          )}
+          {currentPage === "facilities" && (
+            <CampusLifePage
+              onNavigate={navigateTo}
+              onOpenAdmissionModal={() => handleOpenAdmissionModal()}
+            />
+          )}
+          {currentPage === "gallery" && (
+            <Gallery
+              onNavigate={navigateTo}
+              onOpenAdmissionModal={() => handleOpenAdmissionModal()}
+            />
+          )}
+          {currentPage === "circulars" && (
+            <CircularsEvents
+              onNavigate={navigateTo}
+              onOpenAdmissionModal={() => handleOpenAdmissionModal()}
+            />
+          )}
+          {currentPage === "contact" && (
+            <Contact onNavigate={navigateTo} />
+          )}
+        </PageTransition>
       </main>
 
       <Footer
@@ -193,6 +418,7 @@ export default function App() {
         defaultStream={selectedStream}
       />
 
+      {/* Floating Mobile CTA */}
       <div className="mobile-floating-apply">
         <button
           onClick={() => handleOpenAdmissionModal()}

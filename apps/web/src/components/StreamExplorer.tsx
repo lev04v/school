@@ -1,561 +1,660 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 
 type StreamTab = "science" | "commerce" | "humanities" | "secondary" | "foundational";
 
 interface StreamExplorerProps {
-  onOpenAdmissionModal: (stream?: string) => void;
+  onOpenAdmissionModal?: (stream?: string) => void;
+  onSelectStream?: (stream?: string) => void;
 }
 
-export default function StreamExplorer({ onOpenAdmissionModal }: StreamExplorerProps) {
+interface StreamData {
+  id: StreamTab;
+  tabTitle: string;
+  tabBadge: string;
+  tabIcon: string;
+  code: string;
+  affiliation: string;
+  heading: string;
+  description: string;
+  statNumber: string;
+  statLabel: string;
+  admissionStreamName: string;
+  syllabusLabel: string;
+  coreSubjects: {
+    title: string;
+    items: { name: string; tag?: string }[];
+    note?: string;
+  };
+  electives: {
+    title: string;
+    items: { name: string; tag?: string }[];
+    note?: string;
+  };
+  practicals: {
+    title: string;
+    items: string[];
+  };
+  pathways: {
+    title: string;
+    badges: string[];
+    items: string[];
+  };
+  features: {
+    icon: string;
+    title: string;
+    desc: string;
+  }[];
+}
+
+const streamsData: Record<StreamTab, StreamData> = {
+  science: {
+    id: "science",
+    tabTitle: "Science Stream (PCM / PCB)",
+    tabBadge: "10+2",
+    tabIcon: "fas fa-atom",
+    code: "CBSE STREAM CODE: 01",
+    affiliation: "AISSCE Class XI & XII",
+    heading: "Science Stream — Medical, Engineering & STEM Excellence",
+    description:
+      "Engineered for future doctors, engineers, data scientists, and research innovators. Our science curriculum seamlessly integrates rigorous CBSE board mastery with synchronized IIT-JEE and NEET-UG analytical mentoring led by veteran faculty.",
+    statNumber: "98.4%",
+    statLabel: "Top Science Board Score (Class 12)",
+    admissionStreamName: "Science Stream (10+2)",
+    syllabusLabel: "Download Science Syllabus & Booklist",
+    coreSubjects: {
+      title: "Core Subject Groups",
+      items: [
+        { name: "Non-Medical (PCM)", tag: "Engineering" },
+        { name: "Medical (PCB)", tag: "Medical" },
+        { name: "Dual Science (PCMB)", tag: "Biotech / Research" },
+        { name: "Physics & Chemistry", tag: "Compulsory" },
+        { name: "English Core", tag: "Language" },
+      ],
+      note: "Comprehensive theoretical proofs, conceptual derivation drills, and synchronized question-bank mastery.",
+    },
+    electives: {
+      title: "5th & 6th Elective Specializations",
+      items: [
+        { name: "Computer Science (Python & SQL)", tag: "Tech" },
+        { name: "Informatics Practices (IP)", tag: "Data" },
+        { name: "Applied Mathematics", tag: "Quantitative" },
+        { name: "Physical Education", tag: "Sports Science" },
+        { name: "Fine Arts / Painting", tag: "Creative" },
+      ],
+      note: "Choose industry-aligned electives that maximize competitive exam agility and CBSE aggregate scores.",
+    },
+    practicals: {
+      title: "Laboratories & Hands-on Training",
+      items: [
+        "Dedicated Senior Physics, Chemistry & Biology Research Laboratories",
+        "NITI Aayog Atal Tinkering Lab (ATL) for Robotics, AI & IoT prototyping",
+        "Individual student lab workstations with certified safety protocols",
+        "Weekly experimental demonstrations, project portfolios & mock viva prep",
+      ],
+    },
+    pathways: {
+      title: "Competitive Exam Roadmaps",
+      badges: ["IIT-JEE (Main & Adv)", "NEET-UG", "IISER / NISER", "NDA", "Olympiads"],
+      items: [
+        "Daily practice problem sheets (DPPs) with video solution keys",
+        "Full-length CBT simulation mock exams with All-India percentile benchmark",
+        "Special doubt clearing clinics and Olympiad (NSO, IMO) training",
+      ],
+    },
+    features: [
+      {
+        icon: "fas fa-award",
+        title: "100% Board Pass Rate",
+        desc: "Consistent 1st division record in CBSE Class XII examinations.",
+      },
+      {
+        icon: "fas fa-user-graduate",
+        title: "Premier Campus Selections",
+        desc: "32+ students in IITs, NITs, BITS, and AIIMS in recent sessions.",
+      },
+      {
+        icon: "fas fa-microscope",
+        title: "Individual Lab Workstations",
+        desc: "Every scholar performs hands-on experiments independently.",
+      },
+    ],
+  },
+
+  commerce: {
+    id: "commerce",
+    tabTitle: "Commerce Stream",
+    tabBadge: "10+2",
+    tabIcon: "fas fa-chart-line",
+    code: "CBSE STREAM CODE: 02",
+    affiliation: "AISSCE Class XI & XII",
+    heading: "Commerce Stream — Business, Finance & Corporate Leadership",
+    description:
+      "Designed for tomorrow's chartered accountants, corporate leaders, investment bankers, and entrepreneurs. Combines foundational principles of accounting and macroeconomic strategy with live market case studies and financial technology.",
+    statNumber: "99/100",
+    statLabel: "Perfect Score in Accountancy & Economics",
+    admissionStreamName: "Commerce Stream (10+2)",
+    syllabusLabel: "Download Commerce Subject Schemes",
+    coreSubjects: {
+      title: "Compulsory Core Foundations",
+      items: [
+        { name: "Accountancy", tag: "Company & Partnership" },
+        { name: "Business Studies", tag: "Management & Finance" },
+        { name: "Economics", tag: "Macro & Indian Economy" },
+        { name: "English Core", tag: "Business Communication" },
+      ],
+      note: "Deep conceptual grounding in double-entry bookkeeping, balance sheet auditing, and fiscal policy analysis.",
+    },
+    electives: {
+      title: "Elective Combinations & Skill Courses",
+      items: [
+        { name: "Applied Mathematics", tag: "Recommended for CA/CUET" },
+        { name: "Informatics Practices (IP)", tag: "DBMS & Python" },
+        { name: "Entrepreneurship", tag: "Startup Incubation" },
+        { name: "Physical Education", tag: "Sports" },
+      ],
+      note: "Applied Mathematics is strongly encouraged for commerce scholars aiming for top DU colleges and CA/CS pathways.",
+    },
+    practicals: {
+      title: "Practical & Experiential Learning",
+      items: [
+        "Computerized Accounting Laboratory with Tally ERP 9 & Excel modeling",
+        "Annual Horizon Youth Entrepreneurship & Shark Tank Innovation Fest",
+        "Mock Stock Market Trading Competitions & Union Budget Analysis",
+        "Corporate internships, industrial visits, and project viva preparation",
+      ],
+    },
+    pathways: {
+      title: "University & Professional Roadmaps",
+      badges: ["CUET-UG (SRCC / Hindu)", "CA Foundation", "CS Executive", "IPMAT (IIMs)", "CFA Prep"],
+      items: [
+        "Targeted CUET coaching for top Delhi University, Mumbai & Bangalore business colleges",
+        "CA Foundation weekend foundation classes by practicing Chartered Accountants",
+        "Preparation for IPMAT integrated MBA programs at IIM Indore and Rohtak",
+      ],
+    },
+    features: [
+      {
+        icon: "fas fa-graduation-cap",
+        title: "CUET Top-Tier Placement",
+        desc: "Over 90% of commerce batch secures entry into elite universities.",
+      },
+      {
+        icon: "fas fa-briefcase",
+        title: "Industry Guest Masterclasses",
+        desc: "Direct interactions with active CAs, CFAs, and venture startup founders.",
+      },
+      {
+        icon: "fas fa-file-invoice-dollar",
+        title: "100% Viva & Project Score",
+        desc: "Exemplary track record in internal assessments and project portfolios.",
+      },
+    ],
+  },
+
+  humanities: {
+    id: "humanities",
+    tabTitle: "Humanities / Arts",
+    tabBadge: "10+2",
+    tabIcon: "fas fa-landmark",
+    code: "CBSE STREAM CODE: 03",
+    affiliation: "AISSCE Class XI & XII",
+    heading: "Humanities & Social Sciences — Policy, Law & Global Affairs",
+    description:
+      "A prestigious liberal arts pathway fostering critical reasoning, analytical writing, and geopolitical insight. Ideal for students aspiring towards Civil Services (UPSC), Judiciary & CLAT, International Diplomacy, Psychology, and Media.",
+    statNumber: "97.8%",
+    statLabel: "Top Humanities Board Aggregate",
+    admissionStreamName: "Humanities Stream (10+2)",
+    syllabusLabel: "Download Humanities Curriculum Guide",
+    coreSubjects: {
+      title: "Core Humanities Framework",
+      items: [
+        { name: "Political Science", tag: "Constitution & Global Affairs" },
+        { name: "History", tag: "Indian & World Themes" },
+        { name: "Economics", tag: "Development & Statistics" },
+        { name: "English Core", tag: "Literary Theory & Rhetoric" },
+      ],
+      note: "Cultivates original thesis formulation, historical context analysis, and constitutional argument skills.",
+    },
+    electives: {
+      title: "Specialized Elective Choices",
+      items: [
+        { name: "Psychology", tag: "Behavioral & Cognitive" },
+        { name: "Sociology", tag: "Society & Social Change" },
+        { name: "Legal Studies", tag: "Jurisprudence & Law" },
+        { name: "Fine Arts / Painting", tag: "Visual Arts" },
+        { name: "Geography", tag: "Physical & Human Geo" },
+      ],
+      note: "Offers multidisciplinary subject pairings tailored to student career aspirations in civil services or law.",
+    },
+    practicals: {
+      title: "Workshops, Labs & Enrichment",
+      items: [
+        "Annual Horizon Model United Nations (HMUN) and Youth Parliamentary debates",
+        "Dedicated Psychology Laboratory equipped with standardized psychometric tests",
+        "Field excursions to national archives, museums, and supreme court proceedings",
+        "Mentored research dissertations and policy position papers before college",
+      ],
+    },
+    pathways: {
+      title: "Career & Competitive Horizons",
+      badges: ["UPSC Civil Services Foundation", "CLAT & AILET (Law)", "CUET Arts", "Diplomacy / IFS", "Media & Journalism"],
+      items: [
+        "UPSC civil services foundation circle with daily editorial and current affairs analysis",
+        "CLAT legal aptitude, logical reasoning, and reading comprehension workshops",
+        "Guidance for top Central Universities (JNU, DU, Ashoka, Azim Premji)",
+      ],
+    },
+    features: [
+      {
+        icon: "fas fa-balance-scale",
+        title: "National Law University Ranks",
+        desc: "Multiple selections in NLSIU Bangalore, NALSAR, and WBNUJS.",
+      },
+      {
+        icon: "fas fa-microphone-alt",
+        title: "State Youth Parliament Laurels",
+        desc: "Award-winning parliamentary debating delegation in national circuits.",
+      },
+      {
+        icon: "fas fa-book-open",
+        title: "Scholarly Research Monograph",
+        desc: "Each student publishes an original mentored research dissertation.",
+      },
+    ],
+  },
+
+  secondary: {
+    id: "secondary",
+    tabTitle: "Secondary School (AISSE)",
+    tabBadge: "Class IX-X",
+    tabIcon: "fas fa-graduation-cap",
+    code: "CBSE AISSE ACCREDITED",
+    affiliation: "Class IX & X (Secondary Board)",
+    heading: "Secondary Wing — Conceptual Mastery & Board Readiness",
+    description:
+      "Building robust analytical thinking and strong fundamental concepts across all disciplines before entering 10+2. Our structured curriculum emphasizes NCERT mastery, science experiments, and CBSE Class X Board exam readiness without rote learning.",
+    statNumber: "100%",
+    statLabel: "Class 10 CBSE Board Pass Percentage",
+    admissionStreamName: "Secondary Wing (Class IX-X)",
+    syllabusLabel: "View Class 10 Assessment Pattern",
+    coreSubjects: {
+      title: "CBSE Board Examination Subjects",
+      items: [
+        { name: "English Language & Lit (Code 184)", tag: "Language I" },
+        { name: "Mathematics (Standard / Basic)", tag: "Code 041/241" },
+        { name: "Science (Physics, Chem, Bio)", tag: "Integrated Theory & Practical" },
+        { name: "Social Science (Hist, Civics, Geo, Eco)", tag: "Core" },
+      ],
+      note: "Options for Mathematics Standard (for STEM aspirations) or Mathematics Basic (for Humanities/Commerce focus).",
+    },
+    electives: {
+      title: "Second Language & Skill Electives",
+      items: [
+        { name: "Hindi Course A / Course B", tag: "Language II" },
+        { name: "Sanskrit / French", tag: "Classical & Foreign" },
+        { name: "Artificial Intelligence (AI)", tag: "CBSE Skill" },
+        { name: "Information Technology (IT)", tag: "Computer" },
+      ],
+      note: "Skill subjects act as an aggregate booster and provide early exposure to modern AI and coding logic.",
+    },
+    practicals: {
+      title: "Assessment & Laboratory Framework",
+      items: [
+        "Structured Periodic Tests (PT 1, PT 2, PT 3) with customized learning diagnostics",
+        "Triple Pre-Board Exam Series simulated under exact CBSE examination center conditions",
+        "Subject Enrichment Activities, Art-Integrated projects, and Portfolio reviews",
+        "Science practical manuals and hands-on laboratory experiments for every student",
+      ],
+    },
+    pathways: {
+      title: "Olympiads & Early Aptitude Mentorship",
+      badges: ["SOF Olympiads (NSO, IMO)", "CBSE Aryabhata Ganit", "NTSE Foundation", "Spell Bee", "ATL Innovation"],
+      items: [
+        "Rigorous training for National Science Olympiad (NSO) and International Math Olympiad (IMO)",
+        "CBSE Aryabhata Ganit Challenge preparation for analytical and mental math agility",
+        "Stream counseling and psychological aptitude testing at the end of Class 10",
+      ],
+    },
+    features: [
+      {
+        icon: "fas fa-trophy",
+        title: "100% Board Pass Rate",
+        desc: "Over 35% of the batch scores 90%+ aggregate in Class X CBSE Boards.",
+      },
+      {
+        icon: "fas fa-user-friends",
+        title: "Remedial Doubt Clinics",
+        desc: "Special small-batch support sessions ensuring no student is left behind.",
+      },
+      {
+        icon: "fas fa-desktop",
+        title: "Smart Classroom Simulations",
+        desc: "Complex math theorems and science phenomena taught using 3D digital boards.",
+      },
+    ],
+  },
+
+  foundational: {
+    id: "foundational",
+    tabTitle: "Foundational & Middle",
+    tabBadge: "Nursery-VIII",
+    tabIcon: "fas fa-shapes",
+    code: "NEP 2020 & NCF ALIGNED",
+    affiliation: "Nursery to Class VIII",
+    heading: "Foundational, Preparatory & Middle Wings — Joyful Discovery",
+    description:
+      "Nurturing joyful curiosity, self-confidence, and ethical values in a child’s formative years. Following the National Education Policy (NEP 2020) and NCF guidelines, we cultivate experiential learning through storytelling, sports, phonics, and hands-on discovery.",
+    statNumber: "1:15",
+    statLabel: "Student-Teacher Mentorship Ratio",
+    admissionStreamName: "Primary / Middle School",
+    syllabusLabel: "Explore Primary Activity Wings",
+    coreSubjects: {
+      title: "Foundational & Preparatory Stages",
+      items: [
+        { name: "Foundational Stage (Nursery–UKG)", tag: "Play-Way & Sensory" },
+        { name: "Preparatory Stage (Classes I–V)", tag: "FLN & Discovery" },
+        { name: "Environmental Studies (EVS)", tag: "Inquiry" },
+        { name: "Foundational Literacy & Numeracy", tag: "Core Mastery" },
+      ],
+      note: "Phonetic reading programs, hands-on Montessori manipulative kits, and bilingual conversational fluency.",
+    },
+    electives: {
+      title: "Middle School Expansion (Classes VI–VIII)",
+      items: [
+        { name: "Departmental Science Labs", tag: "Inquiry" },
+        { name: "Applied & Vedic Mathematics", tag: "Problem-Solving" },
+        { name: "Third Language (Sanskrit / French)", tag: "Language III" },
+        { name: "Vocational Skills (Robotics / Coding)", tag: "NEP Vocational" },
+      ],
+      note: "Introduces subject-specialist teachers and vocational craftsmanship including carpentry, pottery, and coding.",
+    },
+    practicals: {
+      title: "Creative Arts & Experiential Activities",
+      items: [
+        "Junior Atal Tinkering Lab for LEGO robotics, beginner mechanics, and logic puzzles",
+        "Hindustani Classical Vocal Music, Tabla, Keyboard, Dance, and Dramatics studios",
+        "Daily physical education, martial arts (Taekwondo), Yoga, Skating, and field athletics",
+        "Activity-driven 'Zero Bag Weight' days dedicated to environmental field exploration",
+      ],
+    },
+    pathways: {
+      title: "Child Well-Being & Holistic Growth",
+      badges: ["Holistic Progress Card", "Moral Values Circle", "Language Immersion", "STEAM Junior", "Life Skills"],
+      items: [
+        "Continuous 360-degree Holistic Progress Card (HPC) tracking cognitive, socio-emotional, and motor development",
+        "Value education circles rooted in empathy, respect for nature, and cultural heritage",
+        "Parent-educator collaborative development workshops and milestone tracking",
+      ],
+    },
+    features: [
+      {
+        icon: "fas fa-shield-alt",
+        title: "Child-Safe Campus Infrastructure",
+        desc: "Padded floor arenas, child-friendly ergonomic furniture, and 24/7 CCTV vigilance.",
+      },
+      {
+        icon: "fas fa-feather-alt",
+        title: "Zero Heavy Bag Burden",
+        desc: "Activity-driven classrooms ensuring learning is delightful and never burdensome.",
+      },
+      {
+        icon: "fas fa-heart",
+        title: "Pastoral Emotional Care",
+        desc: "Certified child counselors and warm, empathetic primary educators.",
+      },
+    ],
+  },
+};
+
+export default function StreamExplorer({
+  onOpenAdmissionModal,
+  onSelectStream,
+}: StreamExplorerProps) {
   const [activeTab, setActiveTab] = useState<StreamTab>("science");
+
+  const currentStream = streamsData[activeTab];
+
+  const handleApply = (streamName: string) => {
+    if (onOpenAdmissionModal) {
+      onOpenAdmissionModal(streamName);
+    } else if (onSelectStream) {
+      onSelectStream(streamName);
+    }
+  };
 
   return (
     <section className="section-streams" id="streams">
       <div className="container">
         {/* Section Header */}
-        <div className="streams-header-block">
-          <span className="section-eyebrow">ACADEMIC EXCELLENCE & 10+2 PATHWAYS</span>
+        <div className="streams-header-block reveal-up">
+          <span className="section-eyebrow">ACADEMIC EXCELLENCE &amp; 10+2 PATHWAYS</span>
           <h2 className="section-title">
             Specialized Streams for <em>Senior Secondary (10+2)</em>
           </h2>
           <p className="section-subtitle">
-            Horizon Academy offers affiliated CBSE 10+2 curricula tailored to launch students
-            into India’s top universities, engineering & medical colleges, law schools, and global institutions.
+            Horizon Academy offers accredited CBSE 10+2 curricula and foundational wings tailored to launch students
+            into India’s top universities, engineering &amp; medical colleges, law schools, and global institutions.
           </p>
         </div>
 
         {/* Kingster-style Filter Navigation Pills */}
-        <div className="stream-tabs-nav" role="tablist">
-          <button
-            className={`stream-tab-btn ${activeTab === "science" ? "active" : ""}`}
-            onClick={() => setActiveTab("science")}
-            role="tab"
-            aria-selected={activeTab === "science"}
-          >
-            <span className="tab-badge">10+2</span>
-            <span>Science Stream (PCM / PCB)</span>
-          </button>
-          <button
-            className={`stream-tab-btn ${activeTab === "commerce" ? "active" : ""}`}
-            onClick={() => setActiveTab("commerce")}
-            role="tab"
-            aria-selected={activeTab === "commerce"}
-          >
-            <span className="tab-badge">10+2</span>
-            <span>Commerce Stream</span>
-          </button>
-          <button
-            className={`stream-tab-btn ${activeTab === "humanities" ? "active" : ""}`}
-            onClick={() => setActiveTab("humanities")}
-            role="tab"
-            aria-selected={activeTab === "humanities"}
-          >
-            <span className="tab-badge">10+2</span>
-            <span>Humanities / Arts</span>
-          </button>
-          <button
-            className={`stream-tab-btn ${activeTab === "secondary" ? "active" : ""}`}
-            onClick={() => setActiveTab("secondary")}
-            role="tab"
-            aria-selected={activeTab === "secondary"}
-          >
-            <span className="tab-badge">Class IX-X</span>
-            <span>Secondary School (AISSE)</span>
-          </button>
-          <button
-            className={`stream-tab-btn ${activeTab === "foundational" ? "active" : ""}`}
-            onClick={() => setActiveTab("foundational")}
-            role="tab"
-            aria-selected={activeTab === "foundational"}
-          >
-            <span className="tab-badge">Nursery-VIII</span>
-            <span>Foundational & Middle</span>
-          </button>
+        <div className="stream-tabs-nav reveal-up" role="tablist" aria-label="Select Academic Stream or Class Wing">
+          {(Object.keys(streamsData) as StreamTab[]).map((tabKey) => {
+            const tab = streamsData[tabKey];
+            const isActive = activeTab === tabKey;
+            return (
+              <button
+                key={tabKey}
+                className={`stream-tab-btn ${isActive ? "active" : ""}`}
+                onClick={() => setActiveTab(tabKey)}
+                role="tab"
+                aria-selected={isActive}
+              >
+                <span className="tab-badge">{tab.tabBadge}</span>
+                <span className="tab-title-wrap">
+                  <i className={`${tab.tabIcon} tab-btn-icon`} />
+                  <span>{tab.tabTitle}</span>
+                </span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Stream Content Panels */}
-        <div className="stream-content-card">
-          {/* SCIENCE STREAM */}
-          {activeTab === "science" && (
-            <div className="stream-panel">
-              <div className="panel-main">
+        {/* Stream Content Card Frame */}
+        <div className="stream-content-card reveal-up">
+          <div className="stream-panel animate-fade-in" key={currentStream.id}>
+            {/* Left/Main Column: Rich Cards */}
+            <div className="panel-main">
+              {/* Top Banner Card */}
+              <div className="stream-hero-card">
                 <div className="stream-tag-row">
-                  <span className="stream-code">CBSE STREAM CODE: 01</span>
-                  <span className="stream-affiliation">AISSCE Class XI & XII</span>
-                </div>
-                <h3 className="stream-heading">Science Stream — Medical & Non-Medical</h3>
-                <p className="stream-desc">
-                  Engineered for future doctors, engineers, researchers, and innovators. Our science curriculum
-                  blends rigorous CBSE board mastery with integrated IIT-JEE and NEET-UG problem-solving sessions
-                  conducted by veteran senior PGT faculties.
-                </p>
-
-                <div className="stream-specs-grid">
-                  <div className="spec-box">
-                    <span className="spec-label">Core Subject Groups</span>
-                    <ul className="spec-list">
-                      <li><strong>Non-Medical (PCM):</strong> Physics, Chemistry, Mathematics, English Core</li>
-                      <li><strong>Medical (PCB):</strong> Physics, Chemistry, Biology, English Core</li>
-                      <li><strong>Dual Science (PCMB):</strong> Physics, Chem, Maths, Bio, English</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">5th & 6th Elective Choices</span>
-                    <ul className="spec-list">
-                      <li>Computer Science (Python & SQL)</li>
-                      <li>Informatics Practices (IP)</li>
-                      <li>Physical Education (Sports Science)</li>
-                      <li>Fine Arts / Applied Mathematics</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Laboratory & Practical Training</span>
-                    <ul className="spec-list">
-                      <li>Dedicated Senior Physics, Chemistry & Bio Labs</li>
-                      <li>Atal Tinkering Lab (ATL) Embedded Projects</li>
-                      <li>Daily Practical Demonstrations & Viva Prep</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Competitive Pathways</span>
-                    <ul className="spec-list">
-                      <li>IIT-JEE (Main & Advanced) Mentorship</li>
-                      <li>NEET-UG Foundation & Mock Test Series</li>
-                      <li>IISER, NDA & Olympiad Special Coaching</li>
-                    </ul>
-                  </div>
+                  <span className="stream-code">
+                    <i className="fas fa-certificate" /> {currentStream.code}
+                  </span>
+                  <span className="stream-affiliation">
+                    <i className="fas fa-check-circle" /> {currentStream.affiliation}
+                  </span>
                 </div>
 
-                <div className="stream-action-bar">
-                  <button
-                    onClick={() => onOpenAdmissionModal("Science Stream (10+2)")}
-                    className="btn-stream-cta"
-                  >
-                    Apply for Class XI Science (2026-27)
-                  </button>
-                  <a href="#circulars" className="btn-stream-syllabus">
-                    Download Science Syllabus & Booklist
-                  </a>
+                <div className="stream-title-row">
+                  <div className="stream-hero-icon-box">
+                    <i className={currentStream.tabIcon} />
+                  </div>
+                  <div>
+                    <h3 className="stream-heading">{currentStream.heading}</h3>
+                    <p className="stream-desc">{currentStream.description}</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="panel-sidebar">
-                <div className="sidebar-stat-card">
-                  <span className="sidebar-stat-number">98.4%</span>
-                  <span className="sidebar-stat-caption">Top Science Board Score (Class 12)</span>
+              {/* 4 Feature Specification Cards Grid */}
+              <div className="stream-specs-grid">
+                {/* Card 1: Core Subjects */}
+                <div className="spec-box spec-box--core">
+                  <div className="spec-card-head">
+                    <div className="spec-card-icon-wrap spec-icon--core">
+                      <i className="fas fa-book-open" />
+                    </div>
+                    <div>
+                      <span className="spec-category-label">Academic Framework</span>
+                      <h4 className="spec-label">{currentStream.coreSubjects.title}</h4>
+                    </div>
+                  </div>
+                  <div className="spec-chips-wrapper">
+                    {currentStream.coreSubjects.items.map((item, idx) => (
+                      <div className="spec-subject-chip" key={idx}>
+                        <span className="chip-name">{item.name}</span>
+                        {item.tag && <span className="chip-tag">{item.tag}</span>}
+                      </div>
+                    ))}
+                  </div>
+                  {currentStream.coreSubjects.note && (
+                    <p className="spec-card-note">
+                      <i className="fas fa-info-circle" /> {currentStream.coreSubjects.note}
+                    </p>
+                  )}
                 </div>
-                <div className="sidebar-feature-list">
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
+
+                {/* Card 2: Electives & Choices */}
+                <div className="spec-box spec-box--electives">
+                  <div className="spec-card-head">
+                    <div className="spec-card-icon-wrap spec-icon--electives">
+                      <i className="fas fa-puzzle-piece" />
+                    </div>
                     <div>
-                      <strong>100% Board Pass Rate</strong>
-                      <p>Consistent 1st division record in CBSE Class 12</p>
+                      <span className="spec-category-label">Specializations</span>
+                      <h4 className="spec-label">{currentStream.electives.title}</h4>
                     </div>
                   </div>
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
-                    <div>
-                      <strong>IIT & Medical Selections</strong>
-                      <p>32+ students in IITs, NITs & AIIMS last session</p>
-                    </div>
+                  <div className="spec-chips-wrapper">
+                    {currentStream.electives.items.map((item, idx) => (
+                      <div className="spec-subject-chip chip--elective" key={idx}>
+                        <span className="chip-name">{item.name}</span>
+                        {item.tag && <span className="chip-tag chip-tag--sub">{item.tag}</span>}
+                      </div>
+                    ))}
                   </div>
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
-                    <div>
-                      <strong>Individual Lab Workstations</strong>
-                      <p>Every student performs independent experiments</p>
-                    </div>
-                  </div>
+                  {currentStream.electives.note && (
+                    <p className="spec-card-note">
+                      <i className="fas fa-info-circle" /> {currentStream.electives.note}
+                    </p>
+                  )}
                 </div>
+
+                {/* Card 3: Laboratories & Practicals */}
+                <div className="spec-box spec-box--labs">
+                  <div className="spec-card-head">
+                    <div className="spec-card-icon-wrap spec-icon--labs">
+                      <i className="fas fa-flask" />
+                    </div>
+                    <div>
+                      <span className="spec-category-label">Experiential Learning</span>
+                      <h4 className="spec-label">{currentStream.practicals.title}</h4>
+                    </div>
+                  </div>
+                  <ul className="spec-feature-bullets">
+                    {currentStream.practicals.items.map((bullet, idx) => (
+                      <li key={idx}>
+                        <i className="fas fa-check-circle" />
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Card 4: Competitive Pathways */}
+                <div className="spec-box spec-box--pathways">
+                  <div className="spec-card-head">
+                    <div className="spec-card-icon-wrap spec-icon--pathways">
+                      <i className="fas fa-compass" />
+                    </div>
+                    <div>
+                      <span className="spec-category-label">Future Roadmap</span>
+                      <h4 className="spec-label">{currentStream.pathways.title}</h4>
+                    </div>
+                  </div>
+                  <div className="spec-pathway-badges">
+                    {currentStream.pathways.badges.map((badge, idx) => (
+                      <span className="pathway-exam-badge" key={idx}>
+                        <i className="fas fa-star" /> {badge}
+                      </span>
+                    ))}
+                  </div>
+                  <ul className="spec-feature-bullets">
+                    {currentStream.pathways.items.map((bullet, idx) => (
+                      <li key={idx}>
+                        <i className="fas fa-arrow-right" />
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Action Bar */}
+              <div className="stream-action-bar">
+                <button
+                  type="button"
+                  onClick={() => handleApply(currentStream.admissionStreamName)}
+                  className="btn-stream-cta"
+                >
+                  <i className="fas fa-pen-nib" /> Apply for {currentStream.tabTitle} (2026-27)
+                </button>
+                <a href="#circulars" className="btn-stream-syllabus">
+                  <i className="fas fa-file-pdf" /> {currentStream.syllabusLabel}
+                </a>
               </div>
             </div>
-          )}
 
-          {/* COMMERCE STREAM */}
-          {activeTab === "commerce" && (
-            <div className="stream-panel">
-              <div className="panel-main">
-                <div className="stream-tag-row">
-                  <span className="stream-code">CBSE STREAM CODE: 02</span>
-                  <span className="stream-affiliation">AISSCE Class XI & XII</span>
+            {/* Right Column: Key Stats & Advantages Sidebar Card */}
+            <aside className="panel-sidebar">
+              {/* Top Stat Highlight Card */}
+              <div className="sidebar-stat-card">
+                <div className="sidebar-stat-ring">
+                  <span className="sidebar-stat-number">{currentStream.statNumber}</span>
+                  <small>DISTINCTION</small>
                 </div>
-                <h3 className="stream-heading">Commerce Stream — Business & Financial Leadership</h3>
-                <p className="stream-desc">
-                  Tailored for tomorrow’s chartered accountants, corporate leaders, entrepreneurs, and economists.
-                  Combines deep theoretical principles of double-entry accounting and market economics with live
-                  case studies and financial analysis.
-                </p>
-
-                <div className="stream-specs-grid">
-                  <div className="spec-box">
-                    <span className="spec-label">Compulsory Core Subjects</span>
-                    <ul className="spec-list">
-                      <li><strong>Accountancy:</strong> Financial Statements, Partnership, Company Accounts</li>
-                      <li><strong>Business Studies:</strong> Management Principles, Finance & Marketing</li>
-                      <li><strong>Economics:</strong> Microeconomics, Macroeconomics & Indian Eco</li>
-                      <li><strong>English Core:</strong> Communication & Business Correspondence</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Elective Combinations</span>
-                    <ul className="spec-list">
-                      <li>Applied Mathematics (Recommended for CUET / CA)</li>
-                      <li>Informatics Practices (IP / Database Management)</li>
-                      <li>Entrepreneurship & Start-up Case Studies</li>
-                      <li>Physical Education</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Practical & Skill Integration</span>
-                    <ul className="spec-list">
-                      <li>Tally ERP & Computerized Accounting System</li>
-                      <li>Annual Horizon Youth Entrepreneurship Fest</li>
-                      <li>Stock Market Simulations & Budget Analysis</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Career & College Pathways</span>
-                    <ul className="spec-list">
-                      <li>CUET-UG Mentorship for SRCC, Hindu, Hansraj</li>
-                      <li>CA Foundation & CS Executive Guidance</li>
-                      <li>BBA, IPMAT (IIM Indore/Rohtak) & CFA Prep</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="stream-action-bar">
-                  <button
-                    onClick={() => onOpenAdmissionModal("Commerce Stream (10+2)")}
-                    className="btn-stream-cta"
-                  >
-                    Apply for Class XI Commerce (2026-27)
-                  </button>
-                  <a href="#circulars" className="btn-stream-syllabus">
-                    Download Commerce Subject Schemes
-                  </a>
-                </div>
+                <span className="sidebar-stat-caption">{currentStream.statLabel}</span>
               </div>
 
-              <div className="panel-sidebar">
-                <div className="sidebar-stat-card">
-                  <span className="sidebar-stat-number">99/100</span>
-                  <span className="sidebar-stat-caption">Perfect Score in Accountancy & Economics</span>
+              {/* Proven Highlights Card */}
+              <div className="sidebar-feature-card">
+                <div className="sidebar-feature-header">
+                  <i className="fas fa-shield-alt" />
+                  <strong>Why Study at Horizon?</strong>
                 </div>
                 <div className="sidebar-feature-list">
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
-                    <div>
-                      <strong>CUET Success Rate</strong>
-                      <p>Admission in Delhi University top-tier colleges</p>
+                  {currentStream.features.map((feat, idx) => (
+                    <div className="feat-item" key={idx}>
+                      <span className="feat-icon">
+                        <i className={feat.icon} />
+                      </span>
+                      <div>
+                        <strong>{feat.title}</strong>
+                        <p>{feat.desc}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
-                    <div>
-                      <strong>Industry Guest Lectures</strong>
-                      <p>Interactions with active CAs, CFAs & startup founders</p>
-                    </div>
-                  </div>
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
-                    <div>
-                      <strong>Project Work Mastery</strong>
-                      <p>100% internal assessment marks in viva & portfolios</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* HUMANITIES STREAM */}
-          {activeTab === "humanities" && (
-            <div className="stream-panel">
-              <div className="panel-main">
-                <div className="stream-tag-row">
-                  <span className="stream-code">CBSE STREAM CODE: 03</span>
-                  <span className="stream-affiliation">AISSCE Class XI & XII</span>
-                </div>
-                <h3 className="stream-heading">Humanities & Social Sciences — Policy, Law & Diplomacy</h3>
-                <p className="stream-desc">
-                  A high-caliber liberal arts foundation fostering critical thinking, research writing, and
-                  societal awareness. Ideal for students aspiring toward Civil Services (UPSC), Judiciary & CLAT,
-                  Diplomacy, Journalism, and International Development.
-                </p>
-
-                <div className="stream-specs-grid">
-                  <div className="spec-box">
-                    <span className="spec-label">Core Humanities Subjects</span>
-                    <ul className="spec-list">
-                      <li><strong>Political Science:</strong> Indian Constitution & Global Politics</li>
-                      <li><strong>History:</strong> Themes in Indian & World Civilizations</li>
-                      <li><strong>Economics:</strong> Development Economics & Statistical Tools</li>
-                      <li><strong>English Core:</strong> Literature, Rhetoric & Research Papers</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Specialised Electives</span>
-                    <ul className="spec-list">
-                      <li>Psychology (Behavioral Science & Counseling)</li>
-                      <li>Sociology (Indian Society & Social Change)</li>
-                      <li>Legal Studies (Constitutional & Criminal Jurisprudence)</li>
-                      <li>Fine Arts / Painting / Applied Arts</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Enrichment & Practical Labs</span>
-                    <ul className="spec-list">
-                      <li>Annual Model United Nations (Horizon MUN)</li>
-                      <li>Psychology Laboratory & Psychometric Testing</li>
-                      <li>Debating Society & Policy Drafting Workshops</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Career Prospects</span>
-                    <ul className="spec-list">
-                      <li>UPSC Civil Services Foundation Orientation</li>
-                      <li>Common Law Admission Test (CLAT) Mentorship</li>
-                      <li>Media, Public Relations & Think Tanks</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="stream-action-bar">
-                  <button
-                    onClick={() => onOpenAdmissionModal("Humanities Stream (10+2)")}
-                    className="btn-stream-cta"
-                  >
-                    Apply for Class XI Humanities (2026-27)
-                  </button>
-                  <a href="#circulars" className="btn-stream-syllabus">
-                    Download Humanities Curriculum
-                  </a>
+                  ))}
                 </div>
               </div>
 
-              <div className="panel-sidebar">
-                <div className="sidebar-stat-card">
-                  <span className="sidebar-stat-number">97.8%</span>
-                  <span className="sidebar-stat-caption">Top Humanities Board Average</span>
+              {/* Quick Inquiry Card */}
+              <div className="sidebar-advisory-card">
+                <div className="advisory-icon-circle">
+                  <i className="fas fa-user-tie" />
                 </div>
-                <div className="sidebar-feature-list">
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
-                    <div>
-                      <strong>National Law Universities</strong>
-                      <p>Top ranks secured by our students in CLAT</p>
-                    </div>
-                  </div>
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
-                    <div>
-                      <strong>National Youth Parliament</strong>
-                      <p>State-level laurels in Parliamentary debate</p>
-                    </div>
-                  </div>
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
-                    <div>
-                      <strong>Research Dissertation</strong>
-                      <p>Mentored academic papers before entering college</p>
-                    </div>
-                  </div>
-                </div>
+                <h4>Need Stream Guidance?</h4>
+                <p>Speak to our senior academic coordinators &amp; counselors for stream assessment.</p>
+                <button
+                  type="button"
+                  onClick={() => handleApply(currentStream.admissionStreamName)}
+                  className="btn-advisory-contact"
+                >
+                  <i className="fas fa-headset" /> Request Counseling Call
+                </button>
               </div>
-            </div>
-          )}
-
-          {/* SECONDARY WING (IX - X) */}
-          {activeTab === "secondary" && (
-            <div className="stream-panel">
-              <div className="panel-main">
-                <div className="stream-tag-row">
-                  <span className="stream-code">CBSE AISSE</span>
-                  <span className="stream-affiliation">Class IX & X (Secondary Board)</span>
-                </div>
-                <h3 className="stream-heading">Secondary Wing — Foundation for Board Excellence</h3>
-                <p className="stream-desc">
-                  Building deep conceptual clarity across core academic disciplines before stepping into 10+2.
-                  Our structured approach emphasizes NCERT mastery, comprehensive laboratory sessions,
-                  and CBSE Class 10 Board exam readiness without rote memorization.
-                </p>
-
-                <div className="stream-specs-grid">
-                  <div className="spec-box">
-                    <span className="spec-label">CBSE Subject Framework</span>
-                    <ul className="spec-list">
-                      <li>English Language & Literature (Code 184)</li>
-                      <li>Mathematics — Standard & Basic Options (Code 041/241)</li>
-                      <li>Science (Integrated Physics, Chemistry, Biology)</li>
-                      <li>Social Science (History, Civics, Geography, Eco)</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Second Language & Skills</span>
-                    <ul className="spec-list">
-                      <li>Hindi Course A / Course B</li>
-                      <li>Sanskrit / French</li>
-                      <li>Information Technology & Artificial Intelligence (AI)</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Continuous Evaluation</span>
-                    <ul className="spec-list">
-                      <li>Periodic Tests (PT 1, PT 2, PT 3) & Term Exams</li>
-                      <li>Rigorous Pre-Board series with detailed feedback</li>
-                      <li>Subject Enrichment Activities & Art-Integrated Projects</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">National Olympiads</span>
-                    <ul className="spec-list">
-                      <li>SOF Olympiads (NSO, IMO, NCO, IEO)</li>
-                      <li>Aryabhata Ganit Challenge by CBSE</li>
-                      <li>NTSE & Kishore Vaigyanik orientation</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="stream-action-bar">
-                  <button
-                    onClick={() => onOpenAdmissionModal("Secondary Wing (Class IX-X)")}
-                    className="btn-stream-cta"
-                  >
-                    Apply for Class IX & X Admissions
-                  </button>
-                  <a href="#circulars" className="btn-stream-syllabus">
-                    View Class 10 Assessment Pattern
-                  </a>
-                </div>
-              </div>
-
-              <div className="panel-sidebar">
-                <div className="sidebar-stat-card">
-                  <span className="sidebar-stat-number">100%</span>
-                  <span className="sidebar-stat-caption">Class 10 CBSE Board Pass Percentage</span>
-                </div>
-                <div className="sidebar-feature-list">
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
-                    <div>
-                      <strong>Remedial Support</strong>
-                      <p>Special personalized attention for developing students</p>
-                    </div>
-                  </div>
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
-                    <div>
-                      <strong>Smart Digital Classes</strong>
-                      <p>3D visualizations and concept simulation tools</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* FOUNDATIONAL & MIDDLE */}
-          {activeTab === "foundational" && (
-            <div className="stream-panel">
-              <div className="panel-main">
-                <div className="stream-tag-row">
-                  <span className="stream-code">NEP 2020 COMPLIANT</span>
-                  <span className="stream-affiliation">Nursery to Class VIII</span>
-                </div>
-                <h3 className="stream-heading">Foundational, Preparatory & Middle Wings</h3>
-                <p className="stream-desc">
-                  Nurturing joyful curiosity and strong ethical roots in a child’s early years. Following
-                  the National Education Policy (NEP 2020) and NCF guidelines, we foster experiential
-                  learning through storytelling, music, sports, phonics, and hands-on discovery.
-                </p>
-
-                <div className="stream-specs-grid">
-                  <div className="spec-box">
-                    <span className="spec-label">Foundational Stage (Nursery - UKG)</span>
-                    <ul className="spec-list">
-                      <li>Theme-based playrooms & sensory activities</li>
-                      <li>Phonetic reading program & conversational confidence</li>
-                      <li>Fine motor skill development through montessori kits</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Preparatory Stage (Classes I - V)</span>
-                    <ul className="spec-list">
-                      <li>Foundational Literacy & Numeracy (FLN) focus</li>
-                      <li>Environmental Studies (EVS), English & Hindi</li>
-                      <li>Introduction to Computers & Basic Coding logic</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Middle School Stage (Classes VI - VIII)</span>
-                    <ul className="spec-list">
-                      <li>Science, Maths & Social Studies deep inquiry</li>
-                      <li>Third Language introduction (Sanskrit / French)</li>
-                      <li>Vocational skills: Robotics, Carpentry, Clay Modeling</li>
-                    </ul>
-                  </div>
-
-                  <div className="spec-box">
-                    <span className="spec-label">Co-Curricular Integration</span>
-                    <ul className="spec-list">
-                      <li>Daily Physical Education, Yoga & Taekwondo</li>
-                      <li>Western & Indian Classical Music, Dance, Dramatics</li>
-                      <li>Inter-house cultural competitions & Sports meets</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="stream-action-bar">
-                  <button
-                    onClick={() => onOpenAdmissionModal("Primary / Middle School")}
-                    className="btn-stream-cta"
-                  >
-                    Apply for Nursery to Class VIII (2026-27)
-                  </button>
-                  <a href="#facilities" className="btn-stream-syllabus">
-                    Explore Primary Activity Wings
-                  </a>
-                </div>
-              </div>
-
-              <div className="panel-sidebar">
-                <div className="sidebar-stat-card">
-                  <span className="sidebar-stat-number">1:20</span>
-                  <span className="sidebar-stat-caption">Individual Teacher-Student Attention Ratio</span>
-                </div>
-                <div className="sidebar-feature-list">
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
-                    <div>
-                      <strong>Child-Safe Infrastructure</strong>
-                      <p>Padded play arenas, child-friendly washrooms & CCTV</p>
-                    </div>
-                  </div>
-                  <div className="feat-item">
-                    <span className="feat-icon">✓</span>
-                    <div>
-                      <strong>Zero Bag Weight Days</strong>
-                      <p>Activity-driven Fridays with no heavy book burdens</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+            </aside>
+          </div>
         </div>
       </div>
     </section>

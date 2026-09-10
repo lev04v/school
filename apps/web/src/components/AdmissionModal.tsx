@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface AdmissionModalProps {
   isOpen: boolean;
@@ -12,7 +12,7 @@ export default function AdmissionModal({ isOpen, onClose, defaultStream }: Admis
     parentName: "",
     mobile: "",
     email: "",
-    grade: defaultStream || "Class XI - Science (PCM/PCB)",
+    grade: defaultStream || "Class XI - Science Non-Medical (PCM + Computers/PE)",
     currentSchool: "",
     previousPercentage: "",
     remarks: "",
@@ -20,6 +20,30 @@ export default function AdmissionModal({ isOpen, onClose, defaultStream }: Admis
 
   const [submitted, setSubmitted] = useState(false);
   const [appRef, setAppRef] = useState("");
+
+  useEffect(() => {
+    if (defaultStream) {
+      setFormData((prev) => ({ ...prev, grade: defaultStream }));
+    }
+  }, [defaultStream]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          onClose();
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -32,59 +56,110 @@ export default function AdmissionModal({ isOpen, onClose, defaultStream }: Admis
 
   const handleReset = () => {
     setSubmitted(false);
+    setFormData({
+      studentName: "",
+      parentName: "",
+      mobile: "",
+      email: "",
+      grade: defaultStream || "Class XI - Science Non-Medical (PCM + Computers/PE)",
+      currentSchool: "",
+      previousPercentage: "",
+      remarks: "",
+    });
     onClose();
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-        {/* Close Button */}
-        <button className="modal-close-btn" onClick={onClose} aria-label="Close Admission Form">
-          ✕
+    <div
+      className="modal-backdrop"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-admission-title"
+    >
+      <div
+        className="modal-card animate-modal-pop"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="modal-close-btn"
+          onClick={onClose}
+          aria-label="Close Admission Form"
+          type="button"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
 
         {submitted ? (
-          <div className="modal-success-box">
+          <div className="modal-success-box animate-fade-in">
             <div className="success-icon-wrap">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg
+                width="36"
+                height="36"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
             </div>
             <span className="success-badge">ENQUIRY REGISTERED SUCCESSFULLY</span>
             <h3 className="success-title">Thank You, {formData.parentName || "Parent"}!</h3>
             <p className="success-msg">
-              Your admission enquiry for <strong>{formData.studentName}</strong> for{" "}
-              <strong>{formData.grade}</strong> has been registered with Horizon Academy.
+              Your admission enquiry for <strong>{formData.studentName || "your ward"}</strong> for{" "}
+              <strong>{formData.grade}</strong> has been received by the Horizon Academy Admissions Directorate.
             </p>
 
             <div className="success-ref-ticket">
               <span className="ticket-label">Application Reference Number</span>
               <strong className="ticket-number">{appRef}</strong>
-              <small className="ticket-note">A confirmation SMS & Email has been dispatched to your contact details.</small>
+              <small className="ticket-note">
+                A confirmation SMS & Email has been dispatched to{" "}
+                <strong>{formData.mobile || "your registered number"}</strong>.
+              </small>
             </div>
 
             <div className="success-next-steps">
               <h4>Next Steps for Parents:</h4>
               <ol>
-                <li>Our Admission Counselor will connect via phone within 24 working hours.</li>
+                <li>Our Senior Admission Counselor will connect via telephone within 24 working hours.</li>
                 <li>Visit campus between 09:00 AM – 02:00 PM for the School Tour & Document Verification.</li>
-                <li>Bring previous year's report card, Birth Certificate, and Passport-size photographs.</li>
+                <li>Bring previous year's report card, Birth Certificate, and passport-size photographs.</li>
               </ol>
             </div>
 
-            <button onClick={handleReset} className="btn-modal-close-final">
-              Done & Return to Homepage
+            <button type="button" onClick={handleReset} className="btn-modal-close-final">
+              Done & Return to Website
             </button>
           </div>
         ) : (
           <div className="modal-form-wrap">
-            {/* Modal Header */}
             <div className="modal-header">
               <div className="modal-crest-row">
-                <span className="cbse-tag-small">CBSE AFFILIATED 10+2 · ESTD. 1998</span>
-                <span className="school-code-small">Affil No. 2130845</span>
+                <span className="cbse-tag-small">CBSE AFFILIATED 10+2 • ESTD. 1998</span>
+                <span className="school-code-small">Affil No. 2130845 | Code: 71204</span>
               </div>
-              <h2 className="modal-title">Admission Enquiry (2026–27)</h2>
+              <h2 id="modal-admission-title" className="modal-title">
+                Online Admission Enquiry (2026–27)
+              </h2>
               <p className="modal-subtitle">
-                Fill this brief form to schedule your campus counseling, syllabus briefing, and school tour.
+                Register for admission counseling, syllabus overview, and personalized campus walkthrough.
               </p>
             </div>
 
@@ -103,12 +178,12 @@ export default function AdmissionModal({ isOpen, onClose, defaultStream }: Admis
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="parentName">Parent / Guardian's Name *</label>
+                  <label htmlFor="parentName">Parent / Guardian Name *</label>
                   <input
                     type="text"
                     id="parentName"
                     required
-                    placeholder="e.g. Dr. Alok Sharma"
+                    placeholder="e.g. Dr. Rajesh Sharma"
                     value={formData.parentName}
                     onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
                   />
@@ -117,7 +192,7 @@ export default function AdmissionModal({ isOpen, onClose, defaultStream }: Admis
 
               <div className="form-row two-col">
                 <div className="form-group">
-                  <label htmlFor="mobile">Contact Mobile Number *</label>
+                  <label htmlFor="mobile">Mobile Number (For Verification SMS) *</label>
                   <input
                     type="tel"
                     id="mobile"
@@ -143,36 +218,37 @@ export default function AdmissionModal({ isOpen, onClose, defaultStream }: Admis
 
               <div className="form-row two-col">
                 <div className="form-group">
-                  <label htmlFor="grade">Class / Stream Seeking Admission *</label>
+                  <label htmlFor="grade">Applying for Class / Stream *</label>
                   <select
                     id="grade"
                     value={formData.grade}
                     onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
                   >
-                    <optgroup label="Foundational & Primary">
-                      <option value="Pre-Primary (Nursery / LKG / UKG)">Pre-Primary (Nursery / LKG / UKG)</option>
+                    <optgroup label="Pre-Primary & Primary Wings">
+                      <option value="Nursery / Early Childhood">Nursery / Early Childhood</option>
+                      <option value="LKG / UKG">LKG / UKG</option>
                       <option value="Class I to V (Primary Wing)">Class I to V (Primary Wing)</option>
                     </optgroup>
-                    <optgroup label="Middle & Secondary">
+                    <optgroup label="Middle & Secondary Wings">
                       <option value="Class VI to VIII (Middle Wing)">Class VI to VIII (Middle Wing)</option>
-                      <option value="Class IX & X (Secondary AISSE)">Class IX & X (Secondary AISSE)</option>
+                      <option value="Class IX (Secondary AISSE)">Class IX (Secondary AISSE)</option>
+                      <option value="Class X (Transfer Candidate)">Class X (Transfer Candidate)</option>
                     </optgroup>
-                    <optgroup label="Senior Secondary 10+2 (CBSE)">
-                      <option value="Class XI - Science (PCM - JEE Track)">Class XI - Science (PCM - Non-Med)</option>
-                      <option value="Class XI - Science (PCB - NEET Track)">Class XI - Science (PCB - Medical)</option>
-                      <option value="Class XI - Commerce (With/Without Maths)">Class XI - Commerce</option>
-                      <option value="Class XI - Humanities / Arts">Class XI - Humanities / Arts</option>
-                      <option value="Class XII (Transfer Cases Only)">Class XII (Transfer Cases Only)</option>
+                    <optgroup label="Senior Secondary (10+2 Specialized Streams)">
+                      <option value="Class XI - Science Non-Medical (PCM + Computers/PE)">Class XI - Science Non-Medical (PCM + Computers/PE)</option>
+                      <option value="Class XI - Science Medical (PCB + Bio/Psychology)">Class XI - Science Medical (PCB + Bio/Psychology)</option>
+                      <option value="Class XI - Commerce (Accountancy, BST, Economics, Applied Maths)">Class XI - Commerce (Accountancy, BST, Economics, Applied Maths)</option>
+                      <option value="Class XI - Humanities (Pol Sci, History, Psychology, Legal Studies)">Class XI - Humanities (Pol Sci, History, Psychology, Legal Studies)</option>
                     </optgroup>
                   </select>
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="prevMarks">Previous Class Marks / Grade %</label>
+                  <label htmlFor="previousPercentage">Previous Class Marks / %</label>
                   <input
                     type="text"
-                    id="prevMarks"
-                    placeholder="e.g. 92% or A1 Grade"
+                    id="previousPercentage"
+                    placeholder="e.g. 92% or Grade A1"
                     value={formData.previousPercentage}
                     onChange={(e) => setFormData({ ...formData, previousPercentage: e.target.value })}
                   />
@@ -180,35 +256,31 @@ export default function AdmissionModal({ isOpen, onClose, defaultStream }: Admis
               </div>
 
               <div className="form-group">
-                <label htmlFor="currentSchool">Current / Previous School & Board</label>
+                <label htmlFor="currentSchool">Current School & Board</label>
                 <input
                   type="text"
                   id="currentSchool"
-                  placeholder="e.g. DPS / DAV / St. Xavier's (CBSE / ICSE / State)"
+                  placeholder="e.g. Delhi Public School (CBSE / ICSE / State)"
                   value={formData.currentSchool}
                   onChange={(e) => setFormData({ ...formData, currentSchool: e.target.value })}
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="remarks">Questions or Specific Requirements (Optional)</label>
+                <label htmlFor="remarks">Special Interests or Questions</label>
                 <textarea
                   id="remarks"
-                  rows={2}
-                  placeholder="e.g. Transport route needed, hostel facility, Olympiad coaching details..."
+                  rows={3}
+                  placeholder="Mention any questions regarding bus transport, scholarship criteria, sports academies, or Olympiad coaching..."
                   value={formData.remarks}
                   onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
                 />
               </div>
 
-              <div className="form-privacy-note">
-                <span>🔒 Your information is confidential and protected under school data safety policies.</span>
-              </div>
-
-              <div className="form-actions">
+              <div className="form-submit-row">
                 <button type="submit" className="btn-submit-admission">
-                  <span>Submit Admission Enquiry</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  <span>Submit Admission Enquiry & Receive Reference ID</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </button>
               </div>
             </form>
