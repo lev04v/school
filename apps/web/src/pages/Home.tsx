@@ -69,23 +69,15 @@ function CyclingTagline() {
   );
 }
 
-export default function Home({ onNavigate, onOpenAdmissionModal }: HomePageProps) {
-  const [heroImgLoaded, setHeroImgLoaded] = useState(false);
-  const [activeStageId, setActiveStageId] = useState<string>("senior");
-  const [activeLifeTab, setActiveLifeTab] = useState<string>("learning");
-  const [activeFaqCategory, setActiveFaqCategory] = useState<string>("all");
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
-  const [activeTestimonial, setActiveTestimonial] = useState<number>(0);
-  const [isStoryVideoOpen, setIsStoryVideoOpen] = useState(false);
-
-  // Statistics Count-Up Animation
+// Self-contained StatsRibbon component to avoid full page re-rendering during count-up
+function StatsRibbon() {
   const statsRef = useRef<HTMLDivElement | null>(null);
   const [hasCounted, setHasCounted] = useState(false);
   const [counters, setCounters] = useState({
-    years: 0,
-    alumni: 0,
-    faculty: 0,
-    passRate: 0,
+    years: 28,
+    alumni: 14000,
+    faculty: 40,
+    passRate: 100,
   });
 
   useEffect(() => {
@@ -93,8 +85,8 @@ export default function Home({ onNavigate, onOpenAdmissionModal }: HomePageProps
       ([entry]) => {
         if (entry.isIntersecting && !hasCounted) {
           setHasCounted(true);
-          const duration = 1600;
-          const steps = 40;
+          const duration = 1200;
+          const steps = 30;
           const stepTime = duration / steps;
           let step = 0;
 
@@ -123,7 +115,7 @@ export default function Home({ onNavigate, onOpenAdmissionModal }: HomePageProps
           }, stepTime);
         }
       },
-      { threshold: 0.25 }
+      { threshold: 0.15 }
     );
 
     if (statsRef.current) {
@@ -131,6 +123,54 @@ export default function Home({ onNavigate, onOpenAdmissionModal }: HomePageProps
     }
     return () => observer.disconnect();
   }, [hasCounted]);
+
+  return (
+    <section id="stats-ribbon" ref={statsRef} className="new-stats-ribbon-bar">
+      <div className="stats-leaf-motif stats-leaf-left" aria-hidden="true">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 90C40 90 80 50 90 10C50 20 10 60 10 90Z" stroke="rgba(255,255,255,0.08)" strokeWidth="3" fill="none" />
+          <path d="M10 90C50 70 70 50 90 10" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
+        </svg>
+      </div>
+      <div className="stats-leaf-motif stats-leaf-right" aria-hidden="true">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M90 90C60 90 20 50 10 10C50 20 90 60 90 90Z" stroke="rgba(255,255,255,0.08)" strokeWidth="3" fill="none" />
+          <path d="M90 90C50 70 30 50 10 10" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
+        </svg>
+      </div>
+
+      <div className="container">
+        <div className="new-stats-grid-row">
+          <div className="new-stat-cell">
+            <div className="new-stat-number">{counters.years > 0 ? `${counters.years}+` : "25+"}</div>
+            <div className="new-stat-caption">Years of Excellence</div>
+          </div>
+          <div className="new-stat-cell">
+            <div className="new-stat-number">{counters.alumni > 0 ? `${(counters.alumni / 7).toFixed(0)}+` : "2000+"}</div>
+            <div className="new-stat-caption">Happy Students</div>
+          </div>
+          <div className="new-stat-cell">
+            <div className="new-stat-number">{counters.faculty > 0 ? `${counters.faculty * 3.75 > 150 ? 150 : Math.round(counters.faculty * 3.75)}+` : "150+"}</div>
+            <div className="new-stat-caption">Dedicated Faculty</div>
+          </div>
+          <div className="new-stat-cell">
+            <div className="new-stat-number">100%</div>
+            <div className="new-stat-caption">Focus on Holistic Growth</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function Home({ onNavigate, onOpenAdmissionModal }: HomePageProps) {
+  const [heroImgLoaded, setHeroImgLoaded] = useState(false);
+  const [activeStageId, setActiveStageId] = useState<string>("senior");
+  const [activeLifeTab, setActiveLifeTab] = useState<string>("learning");
+  const [activeFaqCategory, setActiveFaqCategory] = useState<string>("all");
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [activeTestimonial, setActiveTestimonial] = useState<number>(0);
+  const [isStoryVideoOpen, setIsStoryVideoOpen] = useState(false);
 
   const academicStages: AcademicStage[] = [
     {
@@ -430,44 +470,9 @@ export default function Home({ onNavigate, onOpenAdmissionModal }: HomePageProps
       </section>
 
       {/* =========================================================================
-          SECTION 02 — DEEP FOREST GREEN STATS RIBBON (MATCHING REFERENCE IMAGE)
+          SECTION 02 — DEEP FOREST GREEN STATS RIBBON (ISOLATED COMPONENT)
           ========================================================================= */}
-      <section id="stats-ribbon" ref={statsRef} className="new-stats-ribbon-bar">
-        {/* Subtle decorative leaf watermark on left and right */}
-        <div className="stats-leaf-motif stats-leaf-left" aria-hidden="true">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M10 90C40 90 80 50 90 10C50 20 10 60 10 90Z" stroke="rgba(255,255,255,0.08)" strokeWidth="3" fill="none" />
-            <path d="M10 90C50 70 70 50 90 10" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
-          </svg>
-        </div>
-        <div className="stats-leaf-motif stats-leaf-right" aria-hidden="true">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M90 90C60 90 20 50 10 10C50 20 90 60 90 90Z" stroke="rgba(255,255,255,0.08)" strokeWidth="3" fill="none" />
-            <path d="M90 90C50 70 30 50 10 10" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
-          </svg>
-        </div>
-
-        <div className="container">
-          <div className="new-stats-grid-row">
-            <div className="new-stat-cell">
-              <div className="new-stat-number">{counters.years > 0 ? `${counters.years}+` : "25+"}</div>
-              <div className="new-stat-caption">Years of Excellence</div>
-            </div>
-            <div className="new-stat-cell">
-              <div className="new-stat-number">{counters.alumni > 0 ? `${(counters.alumni / 7).toFixed(0)}+` : "2000+"}</div>
-              <div className="new-stat-caption">Happy Students</div>
-            </div>
-            <div className="new-stat-cell">
-              <div className="new-stat-number">{counters.faculty > 0 ? `${counters.faculty * 3.75 > 150 ? 150 : Math.round(counters.faculty * 3.75)}+` : "150+"}</div>
-              <div className="new-stat-caption">Dedicated Faculty</div>
-            </div>
-            <div className="new-stat-cell">
-              <div className="new-stat-number">100%</div>
-              <div className="new-stat-caption">Focus on Holistic Growth</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <StatsRibbon />
 
       {/* =========================================================================
           SECTION 03 — OUR STORY (MATCHING REFERENCE IMAGE)

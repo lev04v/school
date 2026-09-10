@@ -1822,8 +1822,13 @@
   }
 }
 
-html, body, #root, .homepage-wrap, .site-shell, .page-wrapper {
-  overflow-x: hidden !important;
+html, body {
+  overflow-x: clip;
+  max-width: 100vw;
+}
+
+#root, .homepage-wrap, .site-shell, .page-wrapper {
+  overflow: visible;
   max-width: 100vw;
 }
 

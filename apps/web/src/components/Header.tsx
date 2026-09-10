@@ -21,7 +21,8 @@ export default function Header({ currentPage, onNavigate, onOpenAdmissionModal }
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          setIsScrolled(window.scrollY > 40);
+          const nextScrolled = window.scrollY > 40;
+          setIsScrolled((prev) => (prev !== nextScrolled ? nextScrolled : prev));
           ticking = false;
         });
         ticking = true;
