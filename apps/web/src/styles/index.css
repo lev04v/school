@@ -55,11 +55,18 @@
 }
 
 html {
-  scroll-behavior: smooth;
   font-size: 16px;
   overflow-x: hidden;
   max-width: 100vw;
   width: 100%;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+@media (min-width: 1025px) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -72,6 +79,8 @@ body {
   position: relative;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 #root {
@@ -3516,22 +3525,29 @@ h6 {
 }
 
 @media (max-width: 768px) {
+  #announcement {
+    display: none !important;
+  }
+
   #navbar {
-    width: calc(100% - 24px);
-    max-width: calc(100vw - 24px);
-    top: 54px;
-    left: 12px;
-    transform: none;
+    position: fixed !important;
+    top: 8px !important;
+    left: 12px !important;
+    transform: none !important;
+    width: calc(100% - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
     box-sizing: border-box;
     border-radius: 40px;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    z-index: 1000;
   }
 
   #navbar.scrolled {
-    top: 8px;
-    left: 12px;
-    transform: none;
-    width: calc(100% - 24px);
-    max-width: calc(100vw - 24px);
+    top: 8px !important;
+    left: 12px !important;
+    transform: none !important;
+    width: calc(100% - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
   }
 
   .nav-inner {
@@ -4689,6 +4705,7 @@ h6 {
   overflow: hidden;
   padding-top: 130px;
   padding-bottom: 40px;
+  touch-action: pan-y;
 }
 
 .new-hero-bg-wrap {
@@ -4696,6 +4713,7 @@ h6 {
   inset: 0;
   z-index: 1;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .new-hero-bg-img {

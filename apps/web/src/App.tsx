@@ -273,24 +273,11 @@ export default function App() {
       });
     };
 
-    const handleScroll = () => {
-      const targets = document.querySelectorAll(".reveal:not(.active), .reveal-left:not(.active), .reveal-right:not(.active), .reveal-up:not(.active)");
-      targets.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight - 30 && rect.bottom > 0) {
-          el.classList.add("active");
-        }
-      });
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
     const timer = setTimeout(setupObserver, 50);
     const retryTimer = setTimeout(setupObserver, 250);
     const lateTimer = setTimeout(setupObserver, 750);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
       clearTimeout(timer);
       clearTimeout(retryTimer);
       clearTimeout(lateTimer);

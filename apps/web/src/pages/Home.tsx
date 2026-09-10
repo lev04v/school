@@ -20,23 +20,13 @@ interface AcademicStage {
   image: string;
 }
 
-export default function Home({ onNavigate, onOpenAdmissionModal }: HomePageProps) {
-  const [heroImgLoaded, setHeroImgLoaded] = useState(false);
-  const [activeStageId, setActiveStageId] = useState<string>("senior");
-  const [activeLifeTab, setActiveLifeTab] = useState<string>("learning");
-  const [activeFaqCategory, setActiveFaqCategory] = useState<string>("all");
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
-  const [activeTestimonial, setActiveTestimonial] = useState<number>(0);
-  const [typingIndex, setTypingIndex] = useState(0);
-  const [isStoryVideoOpen, setIsStoryVideoOpen] = useState(false);
-
-  // Typewriter effect state: types, pauses, deletes letter-by-letter
+// Self-contained, memoized cycling tagline component to prevent entire page re-renders
+function CyclingTagline() {
   const [displayText, setDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [loopNum, setLoopNum] = useState(0);
   const [typingSpeed, setTypingSpeed] = useState(55);
 
-  // Rotating taglines
   const typingTexts = [
     "Where Ambition Meets Academic Distinction.",
     "CBSE Affiliated 10+2: Science, Commerce & Humanities.",
@@ -53,7 +43,6 @@ export default function Home({ onNavigate, onOpenAdmissionModal }: HomePageProps
         setTypingSpeed(45);
 
         if (displayText.length + 1 === currentFullText.length) {
-          // Pause when text is fully displayed before starting to delete
           setTypingSpeed(2400);
           setIsDeleting(true);
         }
@@ -64,14 +53,30 @@ export default function Home({ onNavigate, onOpenAdmissionModal }: HomePageProps
         if (displayText.length === 0) {
           setIsDeleting(false);
           setLoopNum((prev) => prev + 1);
-          setTypingIndex((prev) => (prev + 1) % typingTexts.length);
           setTypingSpeed(380);
         }
       }
     }, typingSpeed);
 
     return () => clearTimeout(timer);
-  }, [displayText, isDeleting, loopNum, typingSpeed, typingTexts]);
+  }, [displayText, isDeleting, loopNum, typingSpeed]);
+
+  return (
+    <div className="new-hero-cycling-bar" aria-live="polite">
+      <span className="cycling-indicator-dot" aria-hidden="true"></span>
+      <span className="cycling-active-text">{displayText}</span>
+    </div>
+  );
+}
+
+export default function Home({ onNavigate, onOpenAdmissionModal }: HomePageProps) {
+  const [heroImgLoaded, setHeroImgLoaded] = useState(false);
+  const [activeStageId, setActiveStageId] = useState<string>("senior");
+  const [activeLifeTab, setActiveLifeTab] = useState<string>("learning");
+  const [activeFaqCategory, setActiveFaqCategory] = useState<string>("all");
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [activeTestimonial, setActiveTestimonial] = useState<number>(0);
+  const [isStoryVideoOpen, setIsStoryVideoOpen] = useState(false);
 
   // Statistics Count-Up Animation
   const statsRef = useRef<HTMLDivElement | null>(null);
@@ -349,11 +354,8 @@ export default function Home({ onNavigate, onOpenAdmissionModal }: HomePageProps
               At Horizon Academy, we nurture curious minds, build character and prepare students for a future full of possibilities.
             </p>
 
-            {/* Rotating / Disappearing Taglines */}
-            <div className="new-hero-cycling-bar" aria-live="polite">
-              <span className="cycling-indicator-dot" aria-hidden="true"></span>
-              <span className="cycling-active-text">{displayText}</span>
-            </div>
+            {/* Rotating / Disappearing Taglines (Isolate component to prevent page re-renders) */}
+            <CyclingTagline />
 
             {/* Hero Action Buttons */}
             <div className="new-hero-actions">
