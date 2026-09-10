@@ -212,10 +212,12 @@ export default function App() {
         ".cal-event-card-modern:nth-child(even)",
       ];
 
+      const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+
       leftSelectors.forEach((sel) => {
         document.querySelectorAll(sel).forEach((el, i) => {
           if (!el.classList.contains("reveal-left") && !el.classList.contains("reveal-right") && !el.classList.contains("reveal-up")) {
-            el.classList.add("reveal-left");
+            el.classList.add(isMobile ? "reveal-up" : "reveal-left");
             if (i % 2 === 1) el.classList.add("delay-100");
           }
         });
@@ -224,7 +226,7 @@ export default function App() {
       rightSelectors.forEach((sel) => {
         document.querySelectorAll(sel).forEach((el, i) => {
           if (!el.classList.contains("reveal-left") && !el.classList.contains("reveal-right") && !el.classList.contains("reveal-up")) {
-            el.classList.add("reveal-right");
+            el.classList.add(isMobile ? "reveal-up" : "reveal-right");
             if (i % 2 === 1) el.classList.add("delay-200");
           }
         });

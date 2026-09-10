@@ -1,19 +1,24 @@
-﻿/* ============================================================
+/* ============================================================
    Horizon Academy — THEME STYLESHEET
    ============================================================ */
 
-/* ========== PRELOADER ========== */
+/* ========== PRELOADER (Horizon Academy Royal Loading Screen) ========== */
 #preloader {
   position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 100vw;
+  max-height: 100dvh;
   z-index: 999999;
-  background: #ffffff;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.45s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: auto;
+  box-sizing: border-box;
 }
 
 #preloader.hidden {
@@ -22,76 +27,111 @@
   pointer-events: none;
 }
 
-#preloader .preloader-crest {
-  margin-bottom: 18px;
+#preloader .preloader-backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(120, 53, 15, 0.96) 0%, rgba(31, 41, 55, 0.98) 75%, #111827 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-#preloader .preloader-logo {
+#preloader .preloader-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  width: 100%;
+  max-width: 440px;
+  box-sizing: border-box;
+}
+
+#preloader .preloader-crest {
+  margin-bottom: 20px;
+}
+
+#preloader .preloader-crest-ring {
   width: 82px;
   height: 82px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+  background: linear-gradient(135deg, #78350F 0%, #111827 100%);
+  border: 2px solid #D6A76F;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #D6A76F;
-  border: 2px solid #D6A76F;
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.9rem;
-  font-weight: 900;
-  letter-spacing: 1px;
-  box-shadow: 0 10px 25px rgba(11, 46, 38, 0.35);
-  animation: preloaderPulse 1.8s ease-in-out infinite;
+  box-shadow: 0 0 35px rgba(214, 167, 111, 0.35), 0 12px 30px rgba(0, 0, 0, 0.5);
+  animation: preloaderPulse 1.4s ease-in-out infinite;
+  position: relative;
 }
 
-#preloader p.preloader-title {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 800;
-  font-size: 1.3rem;
-  color: #111827;
-  letter-spacing: -0.3px;
-  margin: 0 0 4px 0;
+#preloader .preloader-leaf {
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
 }
 
-#preloader p.preloader-sub {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.76rem;
+#preloader .preloader-monogram {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 0.92rem;
   font-weight: 700;
-  letter-spacing: 1.8px;
+  color: #D6A76F;
+  letter-spacing: 2px;
+  margin-top: 2px;
+}
+
+#preloader .preloader-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(1.4rem, 4.5vw, 1.9rem);
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  margin: 0 0 6px 0;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+}
+
+#preloader .preloader-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.7rem, 2.2vw, 0.8rem);
+  font-weight: 600;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   color: #D6A76F;
-  margin: 0 0 24px 0;
+  margin: 0 0 22px 0;
+  max-width: 90vw;
+  line-height: 1.4;
 }
 
 #preloader .preloader-bar {
-  width: 170px;
+  width: min(180px, 50vw);
   height: 4px;
-  background: #f3f4f6;
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
   overflow: hidden;
   position: relative;
 }
 
-#preloader .preloader-bar::after {
-  content: "";
+#preloader .preloader-bar-inner {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg, #1F2937, #D6A76F);
+  background: linear-gradient(90deg, #D6A76F 0%, #ffffff 50%, #D6A76F 100%);
   border-radius: 9999px;
-  animation: preloaderBar 1.4s ease-in-out infinite;
+  animation: preloaderBar 1.2s ease-in-out infinite;
 }
 
 @keyframes preloaderPulse {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(11, 46, 38, 0.4);
+    box-shadow: 0 0 25px rgba(214, 167, 111, 0.3);
   }
   50% {
-    transform: scale(1.08);
-    box-shadow: 0 0 0 18px rgba(11, 46, 38, 0);
+    transform: scale(1.05);
+    box-shadow: 0 0 40px rgba(214, 167, 111, 0.55);
   }
 }
 
@@ -1775,8 +1815,16 @@
 .delay-400 { transition-delay: 0.4s; }
 .delay-500 { transition-delay: 0.5s; }
 
-html, body, .homepage-wrap, .site-shell {
+@media (max-width: 768px) {
+  .reveal-left,
+  .reveal-right {
+    transform: translateY(28px) !important;
+  }
+}
+
+html, body, #root, .homepage-wrap, .site-shell, .page-wrapper {
   overflow-x: hidden !important;
+  max-width: 100vw;
 }
 
 /* ============================================================
